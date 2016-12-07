@@ -18,8 +18,8 @@ type = all
 import common
 
 WARNING   = ('Attempt to commit or push too big file(s). '
-              'Limit is: %s bytes\n')
-FILEWARN  = ('   - %s, %s > %s\n')
+              'Limit is: %s bytes')
+FILEWARN  = ('   - %s, %s > %s')
 
 def filesize( files ):
     abort = False

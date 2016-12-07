@@ -21,7 +21,7 @@ class FileAtIndex(object):
         return fnmatch.fnmatch(basename, pattern)
 
 def note(msg):
-    print('*** [Pre-commit hook] ' + msg + ' ***')
+    print('* [Pre-commit hook] ' + msg + ' *')
 
 def error(msg):
     print('*** [Pre-commit hook: ERROR] ' + msg + ' ***')
@@ -41,6 +41,8 @@ def execute_command(proc):
         out = subprocess.check_output(proc.split())
     except subprocess.CalledProcessError:
         return ExecutionResult(1, "")
+    except OSError:
+        return ExecutionResult(1, "")
     return ExecutionResult(0, out)
 
 def _current_commitish():
@@ -49,18 +51,13 @@ def _current_commitish():
     else:
         return 'HEAD'
 
-def get_option(option, default="", type=""):
+def get_option(option, default, type=""):
 
     try:
-        out = subprocess.check_output(('git config ' + type + option).split())
+        out = subprocess.check_output(('git config ' + type + ' ' + option).split()).strip()
         return out
     except subprocess.CalledProcessError:
-        if default:
-            return default
-        else:
-            error("Option '" + option + "' not found and no default value was provided.")
-            error("Commit aborted !!!")
-            exit(1)
+        return default
 
 def _contents(sha):
     return execute_command('git show ' + sha).out

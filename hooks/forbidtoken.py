@@ -52,7 +52,7 @@ WARNING   = ('Attempt to commit or push text file(s) containing "%s"')
 FILEWARN  = ('   - %s:%s')
 
 def forbidtoken( files, config_name ):
-    include_patterns = common.get_option('forbidtoken-hooks.' + config_name, default='*').split()
+    include_patterns = common.get_option('forbidtoken-hook.' + config_name, default='*').split()
 
     common.note('Checking for "' + config_name + '" tokens on ' + ', '.join(include_patterns) + ' files')
     abort   = False
