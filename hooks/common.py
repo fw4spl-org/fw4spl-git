@@ -26,6 +26,10 @@ def note(msg):
 def error(msg):
     print('*** [Pre-commit hook: ERROR] ' + msg + ' ***')
 
+def binary(s):
+    """return true if a string is binary data"""
+    return bool(s and '\0' in s)
+
 ExecutionResult = collections.namedtuple(
     'ExecutionResult',
     'status, out',

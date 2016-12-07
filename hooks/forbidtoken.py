@@ -1,17 +1,15 @@
 """
 Make sure you do not commit TAB, CRLF, ... in matching pattern files.
 
-[hooks]
-pretxncommit.tab = python:hooks.forbid_tab
+.gitconfig configuration :
+
+[fw4spl-hooks]
+    hooks = crlf tab digraphs doxygen
 
 To do the same check on a server to prevent CRLF/CR from being
 pushed or pulled:
 
-[hooks]
-pretxnchangegroup.crlf = python:/path/hooks:forbid_crlf
-
 Default file pattern is '*'. To specify patterns to check :
-
 
 [forbidtoken-hooks]
 crlf= *.cpp *.hpp *.xml
@@ -50,9 +48,7 @@ tr = {
      }
 
 
-SEPARATOR = '%s\n' % ('-'*79)
 WARNING   = ('Attempt to commit or push text file(s) containing "%s"')
-WARNING   = WARNING % ( '%s')
 FILEWARN  = ('   - %s:%s')
 
 def forbidtoken( files, config_name ):
@@ -68,7 +64,7 @@ def forbidtoken( files, config_name ):
         if not any(f.fnmatch(p) for p in include_patterns):
             continue
         content = f.contents
-        if token(content):
+        if not common.binary(f.contents) and token(content):
             if not abort:
                 common.error(WARNING % (tr[config_name][1]))
             for n in line_match(token, content):

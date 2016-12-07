@@ -7,7 +7,7 @@ import subprocess
 import common
 
 import forbidtoken
-#import filesize
+import filesize
 #import codingstyle
 #import check_xml
 #import cppcheck
@@ -37,7 +37,7 @@ DEFAULT_HOOKS = [
 
 hooks = {}
 hooks.update(forbidtoken.hooks)
-#hooks.update(filesize.hooks)
+hooks.update(filesize.hooks)
 #hooks.update(codingstyle.hooks)
 #hooks.update(check_xml.hooks)
 #hooks.update(cppcheck.hooks)
