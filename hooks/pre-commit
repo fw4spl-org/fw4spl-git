@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+#pre-commit
+
+import sys
+import subprocess
+import common
+
+import forbidtoken
+#import filesize
+#import codingstyle
+#import check_xml
+#import cppcheck
+
+def current_commitish():
+    if common.execute_command('git rev-parse --verify HEAD'):
+        return '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
+    else:
+        return 'HEAD'
+
+def file_names(revision):
+    files = common.execute_command('git diff-index --name-only --cached HEAD')
+    files = set(files.splitlines())
+    result = []
+    for f in files:
+        if f != '' and f != "''":
+            result.append(f)
+    return result
+
+DEFAULT_HOOKS = [
+        'crlf',
+        'tab',
+        'filesize',
+        'oslm_log',
+        'digraphs',
+        'codingstyle',
+        'doxygen',
+        'copain',
+        'check_xml',
+        'cppcheck'
+        ]
+
+hooks = {}
+hooks.update(forbidtoken.hooks)
+#hooks.update(filesize.hooks)
+#hooks.update(codingstyle.hooks)
+#hooks.update(check_xml.hooks)
+#hooks.update(cppcheck.hooks)
+
+#active_hooks = ui.configlist('fw4spl-hooks', 'hooks', default=DEFAULT_HOOKS)
+
+active_hooks = common.get_option('fw4spl-hooks.hooks').split()
+
+common.note ('Enabled hooks: ' + ', '.join(active_hooks) + '\n')
+
+rev = current_commitish()
+
+files = file_names(rev)
+
+result = [f(files) for name,f in hooks.items() if name in active_hooks]
+
+result = any(result)
+
+exit(result)
+
