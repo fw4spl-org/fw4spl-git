@@ -21,7 +21,6 @@ tab= *.cpp *.xml *.py
 
 import re
 
-from fnmatch import fnmatch
 from functools import partial
 
 import common
@@ -66,19 +65,18 @@ def forbidtoken( files, config_name ):
     line_match = lambda test, x:(n for n,m in line_iter(x) if test(m.group()))
 
     for f in files:
-        if not any(fnmatch(f, p) for p in include_patterns):
+        if not any(f.fnmatch(p) for p in include_patterns):
             continue
-
-        content = common.get_file_content(f)
+        content = f.contents
         if token(content):
-            print "BITE"
             if not abort:
                 common.error(WARNING % (tr[config_name][1]))
             for n in line_match(token, content):
-                common.error(FILEWARN % (f, n))
+                common.error(FILEWARN % (f.path, n))
             abort = True
 
     if abort:
+        print('\n')
         common.error('Hook "' + config_name + '" failed.\n')
 
     return abort

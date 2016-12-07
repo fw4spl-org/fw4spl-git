@@ -12,14 +12,9 @@ import forbidtoken
 #import check_xml
 #import cppcheck
 
-def current_commitish():
-    if common.execute_command('git rev-parse --verify HEAD'):
-        return '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
-    else:
-        return 'HEAD'
 
 def file_names(revision):
-    files = common.execute_command('git diff-index --name-only --cached HEAD')
+    files = common.execute_command('git diff-index --name-only --cached ' + revision).out
     files = set(files.splitlines())
     result = []
     for f in files:
@@ -53,9 +48,7 @@ active_hooks = common.get_option('fw4spl-hooks.hooks').split()
 
 common.note ('Enabled hooks: ' + ', '.join(active_hooks) + '\n')
 
-rev = current_commitish()
-
-files = file_names(rev)
+files = [f for f in common.files_staged_for_commit()]
 
 result = [f(files) for name,f in hooks.items() if name in active_hooks]
 
