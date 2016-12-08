@@ -9,7 +9,7 @@ import common
 import forbidtoken
 import filesize
 import codingstyle
-#import check_xml
+import check_xml
 #import cppcheck
 
 def usage():
@@ -54,7 +54,7 @@ else:
 hooks = {}
 hooks.update(forbidtoken.hooks)
 hooks.update(filesize.hooks)
-#hooks.update(check_xml.hooks)
+hooks.update(check_xml.hooks)
 #hooks.update(cppcheck.hooks)
 
 print '\n' + '*'*120
