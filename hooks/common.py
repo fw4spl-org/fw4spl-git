@@ -35,6 +35,19 @@ ExecutionResult = collections.namedtuple(
     'status, out',
 )
 
+def get_repo_root():
+    return execute_command('git rev-parse --show-toplevel').out.strip()
+
+def is_LGPL_repo():
+
+    repoRoot = get_repo_root()
+    try:
+        f = open(repoRoot + "/LICENSE/COPYING.LESSER")
+        f.close()
+        return True
+    except:
+        return False
+
 def execute_command(proc):
 
     try:

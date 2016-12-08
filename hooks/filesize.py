@@ -9,9 +9,9 @@ example for 10MB limit :
 [filesize-hook]
 max_size = 10485760
 
-Only binary files are checked by default. To check every files, use the type option :
+All files are checked by default. To check only binray files, use the type option :
 [filesize-hook]
-type = all
+type = binary
 
 '''
 
@@ -23,8 +23,8 @@ FILEWARN  = ('   - %s, %s > %s')
 
 def filesize( files ):
     abort = False
-    limit = int(common.get_option('filesize-hook.max-size', default=1024**2))
-    check_all_files = common.get_option('filesize-hook.type', "binary").strip().lower() == "all"
+    limit = int(common.get_option('filesize-hook.max-size', default=2048**2))
+    check_all_files = common.get_option('filesize-hook.type', "all").strip().lower() != "binary"
     too_big_files = []
 
     for f in files:

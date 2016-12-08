@@ -36,15 +36,15 @@ DOXYGEN = lambda x : '* @class' in x or '* @date' in x or '* @namespace' in x
 COPAIN = lambda x : 'copain' in x
 
 tr = {
-               'crlf' : (CRLF    , 'CRLF line endings'   ),
-                 'cr' : (CR      , 'CR line endings'     ),
-                'tab' : (TAB     , 'TAB'                 ),
-               'lgpl' : (LGPL    , 'LGPL Header'         ),
-                'bsd' : (BSD     , 'BSD Header'          ),
-            'oslmlog' : (SLM_LOG , 'O''SLM_LOG'          ),
-           'digraphs' : (DIGRAPH , 'Forbiden digraphs: <'':, :''>'),
-            'doxygen' : (DOXYGEN , '@class or @date doxygen tag(s)' ),
-             'copain' : (COPAIN  , 'copain' ),
+               'crlf' : (CRLF    , 'CRLF line endings'                     , '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py' ),
+                 'cr' : (CR      , 'CR line endings'                       , '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py' ),
+                'tab' : (TAB     , 'TAB'                                   , '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py' ),
+               'lgpl' : (LGPL    , 'LGPL Header'                           , '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake' ),
+                'bsd' : (BSD     , 'BSD Header'                            , '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake' ),
+            'oslmlog' : (SLM_LOG , 'O''SLM_LOG'                            , '*.cpp *.hpp *.hxx *.cxx *.c *.h' ),
+           'digraphs' : (DIGRAPH , 'Forbiden digraphs: <'':, :''>'         , '*.cpp *.hpp *.hxx *.cxx *.c *.h' ),
+            'doxygen' : (DOXYGEN , '@class @date @namespace doxygen tag(s)', '*.cpp *.hpp *.hxx *.cxx *.c *.h' ),
+             'copain' : (COPAIN  , 'copain'                                , '*.cpp *.hpp *.hxx *.cxx *.c *.h' ),
      }
 
 
@@ -52,7 +52,8 @@ WARNING   = ('Attempt to commit or push text file(s) containing "%s"')
 FILEWARN  = ('   - %s:%s')
 
 def forbidtoken( files, config_name ):
-    include_patterns = common.get_option('forbidtoken-hook.' + config_name, default='*').split()
+
+    include_patterns = common.get_option('forbidtoken-hook.' + config_name, default=tr[config_name][2]).split()
 
     common.note('Checking for "' + config_name + '" tokens on ' + ', '.join(include_patterns) + ' files')
     abort   = False

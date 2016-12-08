@@ -11,7 +11,6 @@ source-patterns : file patterns to process as source code files - default to *.c
 header-patterns : file patterns to process as header files - default to *.hpp *.hxx *.h
 misc-patterns : file patterns to process as non-source code files (build, configuration, etc...)
                 Reformatting is limited to TABs and EOL - default to *.options *.cmake *.txt *.xml
-LGPL-check : check is the LGPL header is correct and mention the current year (since it has been modified)
 show-diff : if something has been reformatted, display a diff of all the modifications at the end - default to yes
 autoclean : automatically remove backup files when a commit succeeds - default to yes
 uncrustify-path : path to the uncrustify program - default to uncrustify
@@ -20,7 +19,6 @@ uncrustify-path : path to the uncrustify program - default to uncrustify
 source-patterns = *.cpp *.cxx *.c
 header-patterns = *.hpp *.hxx *.h
 misc-patterns = *.options *.cmake *.txt *.xml *.json
-LGPL-check=yes
 show-diff=yes
 uncrustify-path=C:\Program files\uncrustify\uncrustify.exe
 
@@ -325,7 +323,7 @@ def codingstyle( files ):
     code_patterns = source_patterns + header_patterns
     include_patterns = code_patterns + misc_patterns
 
-    checkLGPL = common.get_option('codingstyle-hook.LGPL-check', default=True, type='--bool') == "true"
+    checkLGPL = common.is_LGPL_repo()
     sortIncludes = common.get_option('codingstyle-hook.sort-includes', default=False, type='--bool') == "true"
     showDiff = common.get_option('codingstyle-hook.show-diff', default=False, type='--bool') == "true"
     autoclean = common.get_option('codingstyle-hook.autoclean', default=True, type='--bool') == "true"
@@ -345,7 +343,7 @@ def codingstyle( files ):
 
     reformatedList = []
     global repoRoot
-    repoRoot = common.execute_command('git rev-parse --show-toplevel').out.strip()
+    repoRoot = common.get_repo_root()
 
     #sortincludes.find_libraries_and_bundles(repoRoot)
 

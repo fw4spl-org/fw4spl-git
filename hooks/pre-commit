@@ -10,18 +10,7 @@ import codingstyle
 #import check_xml
 #import cppcheck
 
-DEFAULT_HOOKS = [
-        'crlf',
-        'tab',
-        'filesize',
-        'oslm_log',
-        'digraphs',
-        'codingstyle',
-        'doxygen',
-        'copain',
-        'check_xml',
-        'cppcheck'
-        ]
+DEFAULT_HOOKS = 'crlf tab filesize oslm_log digraphs codingstyle doxygen copain check_xml cppcheck'
 
 hooks = {}
 hooks.update(forbidtoken.hooks)
@@ -39,6 +28,10 @@ if files:
     result = [f(files) for name,f in hooks.items() if name in active_hooks]
     result = any(result)
 
+    if(result):
+        common.error("Hook failed !!! ")
+    else:
+        common.note("Hook succeeded ! \o/ ")
     exit(result)
 
 exit(0)
