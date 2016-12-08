@@ -4,6 +4,8 @@
 import os, sys, string
 import re
 
+from common import FormatReturn
+
 g_libs = []
 g_bundles = []
 
@@ -181,5 +183,13 @@ def sort_includes(path):
         elif i < firstLine or i > lastLine:
             newContent += [line]
 
-    open(path, 'wb').writelines(newContent)
+    if content != newContent:
+        if enableReformat:
+            open(path, 'wb').writelines(newContent)
+            return FormatReturn.Modified
+        else:
+            common.error( 'Include headers are not correctly sorted in file : ' + path + '.' )
+            return FormatReturn.Error
+
+    return FormatReturn.NotModified
 

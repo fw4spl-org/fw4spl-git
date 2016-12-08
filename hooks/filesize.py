@@ -21,7 +21,7 @@ WARNING   = ('Attempt to commit or push too big file(s). '
               'Limit is: %s bytes')
 FILEWARN  = ('   - %s, %s > %s')
 
-def filesize( files ):
+def filesize( files, enableReformat ):
     abort = False
     limit = int(common.get_option('filesize-hook.max-size', default=2048**2))
     check_all_files = common.get_option('filesize-hook.type', "all").strip().lower() != "binary"
@@ -36,9 +36,6 @@ def filesize( files ):
 
             if f.size > limit:
                 too_big_files.append(f)
-                common.note('too big')
-            else:
-                common.note('ok')
 
     if too_big_files:
         common.error(WARNING % limit)

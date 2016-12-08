@@ -2,6 +2,8 @@
 # -*- coding: UTF-8 -*-
 #pre-commit
 
+import sys
+
 import common
 
 import forbidtoken
@@ -10,28 +12,107 @@ import codingstyle
 #import check_xml
 #import cppcheck
 
+def usage():
+    print('usage: pre-commit [-h] [--check] [path] [path]\n')
+    print('The script works in three different ways depending on the number of arguments:')
+    print('    - If no argument is specified, the current staged files are processed and \'--check\' is assumed.')
+    print('    - If 1 path is specified, the files modified in the specified path is processed.')
+    print('    - If 2 paths are specified, the files modified between the two paths are processed.')
+    print('\nOptions:')
+    print('--check: Only reports what is wrong and do not reformat anything.\n')
+
 DEFAULT_HOOKS = 'crlf tab filesize oslm_log digraphs codingstyle doxygen copain check_xml cppcheck'
+
+enableReformat = True
+
+if len(sys.argv) > 3:
+    if sys.argv[1] == '--check':
+        enableReformat = False
+        files = [f for f in common.files_in_rev(sys.argv[2], sys.argv[3])]
+    else:
+        usage()
+        exit(1)
+elif len(sys.argv) > 2:
+
+    if sys.argv[1] == '--check':
+        files = [f for f in common.files_in_rev(sys.argv[2])]
+        enableReformat = False
+    else:
+        files = [f for f in common.files_in_rev(sys.argv[1], sys.argv[2])]
+        enableReformat = True
+elif len(sys.argv) > 1:
+    if sys.argv[1] == '-h':
+        usage()
+        exit(1)
+    else:
+        files = [f for f in common.files_in_rev(sys.argv[1])]
+        enableReformat = True
+else:
+    # "Pre-commit" mode, get the list of staged files
+    files = [f for f in common.files_staged_for_commit(common.current_commit())]
 
 hooks = {}
 hooks.update(forbidtoken.hooks)
 hooks.update(filesize.hooks)
-hooks.update(codingstyle.hooks)
 #hooks.update(check_xml.hooks)
 #hooks.update(cppcheck.hooks)
+
+print '\n' + '*'*120
 
 active_hooks = common.get_option('fw4spl-hooks.hooks', default=DEFAULT_HOOKS).split()
 common.note ('Enabled hooks: ' + ', '.join(active_hooks))
 
-files = [f for f in common.files_staged_for_commit()]
+print '\n' + '*'*120
 
 if files:
-    result = [f(files) for name,f in hooks.items() if name in active_hooks]
+    reformated = False
+    if 'codingstyle' in active_hooks:
+
+        common.note("Beautifier phase :")
+        resultCodingstyle, reformatedList = codingstyle.codingstyle(files, enableReformat)
+        print '\n' + '*'*120
+
+    common.note("Check phase :")
+    result = [f(files, enableReformat) for name,f in hooks.items() if name in active_hooks]
+    result.append(resultCodingstyle)
     result = any(result)
 
-    if(result):
-        common.error("Hook failed !!! ")
+    # User report
+    print '\n' + '*'*120
+
+    if(enableReformat):
+        if result:
+            common.error("Check failed !!! Check error messages above.")
+            if reformatedList:
+                print
+                common.note("Meanwhile, some files have been reformatted :")
+                for f in reformatedList:
+                    common.note( '- ' + f )
+                common.note( 'Please review changes.' )
+            print
+            common.error("Please fix the issues, stage modifications with 'git add' and run 'sheldon' again.")
+        else:
+            if reformatedList:
+                common.note("Check succeeded, but some files have been reformatted :")
+                for f in reformatedList:
+                    common.note( '- ' + f )
+                common.note( 'Please review and commit changes.' )
+            else:
+                common.note("Check succeeded ! \o/ ")
     else:
-        common.note("Hook succeeded ! \o/ ")
+        if result or reformatedList:
+            common.error("Check failed !!! ")
+            if reformatedList:
+                common.error( 'The following file(s) are not correctly formatted:' )
+                for f in reformatedList:
+                    common.note( '- ' + f )
+            common.error("Please fix the issues, stage modifications with 'git add' and run 'sheldon' again.")
+
+        else:
+            common.note("Check succeeded ! \o/ ")
+
+    print '*'*120
+
     exit(result)
 
 exit(0)
