@@ -73,7 +73,7 @@ if files:
         print '\n' + '*'*120
 
     common.note("Check phase :")
-    result = [f(files, enableReformat) for name,f in hooks.items() if name in active_hooks]
+    result = [f(files) for name,f in hooks.items() if name in active_hooks]
     result.append(resultCodingstyle)
     result = any(result)
 

@@ -11,15 +11,12 @@ source-patterns : file patterns to process as source code files - default to *.c
 header-patterns : file patterns to process as header files - default to *.hpp *.hxx *.h
 misc-patterns : file patterns to process as non-source code files (build, configuration, etc...)
                 Reformatting is limited to TABs and EOL - default to *.options *.cmake *.txt *.xml
-show-diff : if something has been reformatted, display a diff of all the modifications at the end - default to yes
-autoclean : automatically remove backup files when a commit succeeds - default to yes
 uncrustify-path : path to the uncrustify program - default to uncrustify
 
 [coding-style]
 source-patterns = *.cpp *.cxx *.c
 header-patterns = *.hpp *.hxx *.h
 misc-patterns = *.options *.cmake *.txt *.xml *.json
-show-diff=yes
 uncrustify-path=C:\Program files\uncrustify\uncrustify.exe
 
 """
@@ -240,9 +237,7 @@ def codingstyle( files, enableReformat ):
     include_patterns = code_patterns + misc_patterns
 
     checkLGPL = common.is_LGPL_repo()
-    sortIncludes = common.get_option('codingstyle-hook.sort-includes', default=False, type='--bool') == "true"
-    showDiff = common.get_option('codingstyle-hook.show-diff', default=False, type='--bool') == "true"
-    autoclean = common.get_option('codingstyle-hook.autoclean', default=True, type='--bool') == "true"
+    sortIncludes = common.get_option('codingstyle-hook.sort-includes', default="true", type='--bool') == "true"
     global UNCRUSTIFY_PATH
     UNCRUSTIFY_PATH = common.get_option('codingstyle-hook.uncrustify-path', default=[UNCRUSTIFY_PATH], type='--path').strip()
 

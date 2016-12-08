@@ -4,6 +4,7 @@
 import os, sys, string
 import re
 
+import common
 from common import FormatReturn
 
 g_libs = []
@@ -81,7 +82,7 @@ def clean_list(includeList):
     newIncludeList += ['\n']
     return newIncludeList
 
-def sort_includes(path):
+def sort_includes(path, enableReformat):
 
     cur_lib = find_current_library(path)
 

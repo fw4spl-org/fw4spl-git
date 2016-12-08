@@ -51,7 +51,7 @@ tr = {
 WARNING   = ('Attempt to commit or push text file(s) containing "%s"')
 FILEWARN  = ('   - %s:%s')
 
-def forbidtoken( files, enableReformat, config_name ):
+def forbidtoken( files, config_name ):
 
     include_patterns = common.get_option('forbidtoken-hook.' + config_name, default=tr[config_name][2]).split()
 
