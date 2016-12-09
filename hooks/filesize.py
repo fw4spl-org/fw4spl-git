@@ -26,17 +26,23 @@ def filesize( files ):
     limit = int(common.get_option('filesize-hook.max-size', default=2048**2))
     check_all_files = common.get_option('filesize-hook.type', "all").strip().lower() != "binary"
     too_big_files = []
-
+    
+    common.note('Checking files size...')
+    
+    count = 0
     for f in files:
         content = f.contents
         check_file = check_all_files or common.binary(f.contents)
 
         if check_file:
-            common.note('Checking ' + str(f.path) + ' size...')
+            common.trace('Checking ' + str(f.path) + ' size...')
 
+            count = count + 1
             if f.size > limit:
                 too_big_files.append(f)
 
+    common.note('%d file(s) checked.' % count)
+    
     if too_big_files:
         common.error(WARNING % limit)
         for f in too_big_files:

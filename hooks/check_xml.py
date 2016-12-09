@@ -29,6 +29,7 @@ def check_xml(files):
     for f in files:
         if f.path.lower().endswith(('.xml', '.xsd')):
             content = f.contents
+            common.trace('Checking ' + str(f.path) + ' syntax...')
             try:
                 tree = xml_parser(content)
             except ET.ParseError as err:

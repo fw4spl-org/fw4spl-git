@@ -55,7 +55,7 @@ LICENSE = '/\* \*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*\n\
 def fix_license_year(file, enableReformat):
     strOldFile = open(file, 'rb').read()
 
-    common.note( 'Checking for LGPL license in: ' + file )
+    common.trace( 'Checking for LGPL license in: ' + file )
 
     # Look for the license pattern
     match = re.search(LICENSE, strOldFile, re.MULTILINE)
@@ -91,7 +91,8 @@ def format_file(file, enableReformat, code_patterns, header_patterns, misc_patte
     # Invoke uncrustify for source code files
     if any(fnmatch(file, p) for p in code_patterns):
 
-        configFileName = os.path.dirname( __file__ ) + '/uncrustify.cfg'
+        common.trace( 'Launching uncrustify on : ' + file )
+        configFileName = os.path.join(os.path.dirname( __file__ ), 'uncrustify.cfg')
 
         ret = FormatReturn()
 
@@ -130,7 +131,7 @@ def format_file(file, enableReformat, code_patterns, header_patterns, misc_patte
     # Replace only YEAR, TAB, CRLF and CR for miscellaneous files
     elif any(fnmatch(file, p) for p in misc_patterns):
 
-        common.note( 'Parsing: ' + file + ' to replace CR, CRLF and TABs' )
+        common.trace( 'Parsing: ' + file + ' to replace CR, CRLF and TABs' )
 
         strOldFile = open(file, 'rb').read()
 
@@ -151,8 +152,6 @@ def format_file(file, enableReformat, code_patterns, header_patterns, misc_patte
 def fix_header_guard(path, enableReformat):
 
     ret = FormatReturn()
-
-    common.note( 'Parsing: ' + path + ' to check and fix header guard' )
 
     file = open(path, 'r')
     content = file.read()
@@ -222,7 +221,7 @@ def fix_header_guard(path, enableReformat):
             common.error("Can't find #endif with a comment matching the header guard  : " + expectedGuard + "\n")
             common.error(FILEWARN(path))
             return FormatReturn.Error
-
+    
     return ret
 
 #------------------------------------------------------------------------------
@@ -254,6 +253,8 @@ def codingstyle( files, enableReformat ):
     sortincludes.find_libraries_and_bundles(repoRoot)
 
     ret = False
+    count = 0
+    countReformat = 0
     for f in files:
         if f in checked or not any(f.fnmatch(p) for p in include_patterns):
             continue
@@ -265,13 +266,17 @@ def codingstyle( files, enableReformat ):
             # Thus the variable content will no longer reflect the real content of the file
             file = os.path.join(repoRoot, f.path)
             res = format_file(file, enableReformat, code_patterns, header_patterns, misc_patterns, checkLGPL, sortIncludes)
+            count = count + 1
             if res == FormatReturn.Modified:
                 reformatedList.append(f.path)
+                countReformat = countReformat + 1
             elif res == FormatReturn.Error:
                 # Error in reformatting
                 ret = True
 
         checked.add(f)
+
+    common.note('%d file(s) checked, %d file(s) reformatted.' % (count, countReformat) )
 
     return ret, reformatedList
 

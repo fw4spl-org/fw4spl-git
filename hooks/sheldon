@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-import sys
+import argparse
 
 import common
 
@@ -10,46 +10,40 @@ import filesize
 import codingstyle
 import check_xml
 import cppcheck
-
-def usage():
-    print('usage: pre-commit [-h] [--check] [path] [path]\n')
-    print('The script works in three different ways depending on the number of arguments:')
-    print('    - If no argument is specified, the current staged files are processed and \'--check\' is assumed.')
-    print('    - If 1 path is specified, the files modified in the specified path is processed.')
-    print('    - If 2 paths are specified, the files modified between the two paths are processed.')
-    print('\nOptions:')
-    print('--check: Only reports what is wrong and do not reformat anything.\n')
+import textwrap
 
 DEFAULT_HOOKS = 'crlf tab filesize oslm_log digraphs codingstyle doxygen copain check_xml'
 
-enableReformat = True
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description='Check and/or reformat code to comply to FW4SPL coding guidelines.',
+    epilog=textwrap.dedent('The script works in three different ways depending on the number of arguments:\n'
+    '    - If no argument is specified, the current staged files are processed and \'--check\' is assumed.\n'
+    '    - If 1 path is specified, the files modified in the specified path is processed.\n'
+    '    - If 2 paths are specified, the files modified between the two paths are processed.\n')
+)
 
-if len(sys.argv) > 3:
-    if sys.argv[1] == '--check':
-        enableReformat = False
-        files = [f for f in common.files_in_rev(sys.argv[2], sys.argv[3])]
-    else:
-        usage()
-        exit(1)
-elif len(sys.argv) > 2:
+parser.add_argument('-f', '--format', action="store_true", help='Enable code reformatting.')
+parser.add_argument('-v', '--verbose', action="store_true", help='Increase the verbosity level.' )
+parser.add_argument('path', nargs='*', help='Git path, can be a commit or two commits.')
 
-    if sys.argv[1] == '--check':
-        files = [f for f in common.files_in_rev(sys.argv[2])]
-        print files
-        enableReformat = False
-    else:
-        files = [f for f in common.files_in_rev(sys.argv[1], sys.argv[2])]
-        enableReformat = True
-elif len(sys.argv) > 1:
-    if sys.argv[1] == '-h':
-        usage()
-        exit(1)
-    else:
-        files = [f for f in common.files_in_rev(sys.argv[1])]
-        enableReformat = True
+args = parser.parse_args()
+
+common.g_trace = args.verbose
+
+enableReformat = args.format
+
+if len(args.path) > 2:
+    print("Invalid git path")
+    exit(1)
 else:
-    # "Pre-commit" mode, get the list of staged files
-    files = [f for f in common.files_staged_for_commit(common.current_commit())]
+    if len(args.path) > 1:
+        files = [f for f in common.files_in_rev(args.path[0], args.path[1])]
+    elif len(args.path) > 0:
+        files = [f for f in common.files_in_rev(args.path[0])]
+    else:
+        # "Pre-commit" mode, get the list of staged files
+        files = [f for f in common.files_staged_for_commit(common.current_commit())]
 
 hooks = {}
 hooks.update(forbidtoken.hooks)
@@ -58,6 +52,15 @@ hooks.update(check_xml.hooks)
 hooks.update(cppcheck.hooks)
 
 print '\n' + '*'*120
+
+if not files:
+    common.note ('No file(s) found, exiting...')
+    exit(0)
+    
+common.note("Files to process :")
+for f in files:
+    common.note( '- ' + f.path )
+common.note( '')
 
 active_hooks = common.get_option('fw4spl-hooks.hooks', default=DEFAULT_HOOKS).split()
 common.note ('Enabled hooks: ' + ', '.join(active_hooks))

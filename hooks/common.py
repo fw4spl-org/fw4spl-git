@@ -6,6 +6,8 @@ import os, re
 import subprocess
 import fnmatch
 
+g_trace = False
+
 class FormatReturn:
     NotModified = 0
     Modified = 1
@@ -32,6 +34,10 @@ class FileAtIndex(object):
 
 def note(msg):
     print('* [Sheldon] ' + msg )
+    
+def trace(msg):
+    if g_trace:
+        print('* [Sheldon] ' + msg )
 
 def error(msg):
     print('*** [ERROR] ' + msg + ' ***')
@@ -52,7 +58,7 @@ def is_LGPL_repo():
 
     repoRoot = get_repo_root()
     try:
-        f = open(repoRoot + "/LICENSE/COPYING.LESSER")
+        f = open(os.path.join(repoRoot, "LICENSE/COPYING.LESSER"))
         f.close()
         return True
     except:

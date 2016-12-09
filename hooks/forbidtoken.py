@@ -60,10 +60,12 @@ def forbidtoken( files, config_name ):
     token   = tr[config_name][0]
     line_iter = lambda x:enumerate( re.finditer(".*\n", x, re.MULTILINE), 1 )
     line_match = lambda test, x:(n for n,m in line_iter(x) if test(m.group()))
-
+    
+    count = 0
     for f in files:
         if not any(f.fnmatch(p) for p in include_patterns):
             continue
+        common.trace('Checking ' + str(f.path) + '...')
         content = f.contents
         if not common.binary(f.contents) and token(content):
             if not abort:
@@ -71,10 +73,13 @@ def forbidtoken( files, config_name ):
             for n in line_match(token, content):
                 common.error(FILEWARN % (f.path, n))
             abort = True
+        count = count + 1
 
     if abort:
         common.error('Hook "' + config_name + '" failed.')
 
+    common.note('%d file(s) checked.' % count)
+    
     return abort
 
 hooks = dict(
