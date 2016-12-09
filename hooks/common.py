@@ -89,7 +89,7 @@ def _diff_index(rev):
     return execute_command('git diff-index --cached -z --diff-filter=AM ' + rev).out
 
 def _diff(rev, rev2):
-    return execute_command('git diff --cached --raw -z --diff-filter=AM ' + rev + ' ' + rev2).out
+    return execute_command('git diff --raw -z --diff-filter=AM ' + rev + ' ' + rev2).out
 
 def _size(sha):
     cmd_out = execute_command('git cat-file -s ' + sha).out
