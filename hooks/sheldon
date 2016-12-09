@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-#pre-commit
 
 import sys
 
@@ -10,7 +9,7 @@ import forbidtoken
 import filesize
 import codingstyle
 import check_xml
-#import cppcheck
+import cppcheck
 
 def usage():
     print('usage: pre-commit [-h] [--check] [path] [path]\n')
@@ -21,7 +20,7 @@ def usage():
     print('\nOptions:')
     print('--check: Only reports what is wrong and do not reformat anything.\n')
 
-DEFAULT_HOOKS = 'crlf tab filesize oslm_log digraphs codingstyle doxygen copain check_xml cppcheck'
+DEFAULT_HOOKS = 'crlf tab filesize oslm_log digraphs codingstyle doxygen copain check_xml'
 
 enableReformat = True
 
@@ -36,6 +35,7 @@ elif len(sys.argv) > 2:
 
     if sys.argv[1] == '--check':
         files = [f for f in common.files_in_rev(sys.argv[2])]
+        print files
         enableReformat = False
     else:
         files = [f for f in common.files_in_rev(sys.argv[1], sys.argv[2])]
@@ -55,7 +55,7 @@ hooks = {}
 hooks.update(forbidtoken.hooks)
 hooks.update(filesize.hooks)
 hooks.update(check_xml.hooks)
-#hooks.update(cppcheck.hooks)
+hooks.update(cppcheck.hooks)
 
 print '\n' + '*'*120
 
