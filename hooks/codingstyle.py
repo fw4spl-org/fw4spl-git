@@ -239,7 +239,7 @@ def codingstyle( files, enableReformat ):
     checkLGPL = common.is_LGPL_repo()
     sortIncludes = common.get_option('codingstyle-hook.sort-includes', default="true", type='--bool') == "true"
     global UNCRUSTIFY_PATH
-    UNCRUSTIFY_PATH = common.get_option('codingstyle-hook.uncrustify-path', default=[UNCRUSTIFY_PATH], type='--path').strip()
+    UNCRUSTIFY_PATH = common.get_option('codingstyle-hook.uncrustify-path', default=UNCRUSTIFY_PATH, type='--path').strip()
 
     if common.execute_command(UNCRUSTIFY_PATH + ' -v -q').status:
         common.error('Failed to launch uncrustify.\n')
