@@ -222,7 +222,7 @@ def fix_header_guard(path, enableReformat):
             common.error(FILEWARN(path))
             return FormatReturn.Error
     
-    return ret
+    return ret.value
 
 #------------------------------------------------------------------------------
 
