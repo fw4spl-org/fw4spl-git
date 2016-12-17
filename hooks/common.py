@@ -41,6 +41,9 @@ def trace(msg):
 
 def error(msg):
     print('*** [ERROR] ' + msg + ' ***')
+    
+def warn(msg):
+    print('* [Warning] ' + msg + ' *')
 
 def binary(s):
     """return true if a string is binary data"""
