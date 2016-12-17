@@ -84,8 +84,12 @@ def clean_list(includeList):
 
 def sort_includes(path, enableReformat):
 
-    cur_lib = find_current_library(path)
-
+    try:
+        cur_lib = find_current_library(path)
+    except:
+        common.warn( 'Failed to find current library for file ' + path + ', includes order might be wrong.\n' )
+        cur_lib = '!!NOTFOUND!!'
+    
     pathname = os.path.dirname(__file__) + "/"
 
     file = open(pathname + "std_headers.txt", 'r')
@@ -109,7 +113,7 @@ def sort_includes(path, enableReformat):
     for i, line in enumerate(content):
         if(re.match("#include", line)):
             if outOfInclude:
-                common.error( 'Failed to parse includes in file ' + path + ', includes sort is skipped. Maybe there is a #ifdef ? This may be handled in a future version.\n' )
+                common.warn( 'Failed to parse includes in file ' + path + ', includes sort is skipped. Maybe there is a #ifdef ? This may be handled in a future version.\n' )
                 return
 
             if firstLine == -1:
