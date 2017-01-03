@@ -16,7 +16,7 @@ uncrustify-path : path to the uncrustify program - default to uncrustify
 [coding-style]
 source-patterns = *.cpp *.cxx *.c
 header-patterns = *.hpp *.hxx *.h
-misc-patterns = *.options *.cmake *.txt *.xml *.json
+misc-patterns = *.cmake *.txt *.xml *.json
 uncrustify-path=C:\Program files\uncrustify\uncrustify.exe
 
 """
@@ -221,7 +221,7 @@ def fix_header_guard(path, enableReformat):
             common.error("Can't find #endif with a comment matching the header guard  : " + expectedGuard + "\n")
             common.error(FILEWARN(path))
             return FormatReturn.Error
-    
+
     return ret.value
 
 #------------------------------------------------------------------------------
@@ -230,7 +230,7 @@ def codingstyle( files, enableReformat ):
 
     source_patterns = common.get_option('codingstyle-hook.source-patterns', default=['*.cpp','*.cxx','*.c'])
     header_patterns = common.get_option('codingstyle-hook.header-patterns', default=['*.hpp','*.hxx','*.h'])
-    misc_patterns = common.get_option('codingstyle-hook.misc-patterns', default=['*.options','*.cmake','*.txt', '*.xml'])
+    misc_patterns = common.get_option('codingstyle-hook.misc-patterns', default=['*.cmake','*.txt', '*.xml','*.json'])
 
     code_patterns = source_patterns + header_patterns
     include_patterns = code_patterns + misc_patterns
