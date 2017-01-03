@@ -68,18 +68,18 @@ def check_file(file):
                common.error( '[%s] line %s: %s' % (severity, num_line, message) )
                common.error( SEPARATOR )
         return True
-        
+
     return False
-            
+
 #------------------------------------------------------------------------------
 
 def cppcheck(files):
     abort = False
-    source_patterns = common.get_option('codingstyle-hook.source-patterns', default=['*.cpp','*.cxx','*.c'])
-    header_patterns = common.get_option('codingstyle-hook.header-patterns', default=['*.hpp','*.hxx','*.h'])
+    source_patterns = common.get_option('codingstyle-hook.source-patterns', default='*.cpp *.cxx *.c').split()
+    header_patterns = common.get_option('codingstyle-hook.header-patterns', default='*.hpp *.hxx *.h').split()
 
     code_patterns = source_patterns + header_patterns
-    
+
     global CPPCHECK_PATH
     CPPCHECK_PATH = common.get_option('cppcheck-hook.cppcheck-path', default=CPPCHECK_PATH, type='--path').strip()
     if check_cppcheck_install():
@@ -89,7 +89,7 @@ def cppcheck(files):
     repoRoot = common.get_repo_root()
     for f in files:
         if any(fnmatch(f.path.lower(), p) for p in code_patterns):
-                
+
             content = f.contents
             if not common.binary(f.contents):
                 file = os.path.join(repoRoot, f.path)

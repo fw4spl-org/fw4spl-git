@@ -228,9 +228,9 @@ def fix_header_guard(path, enableReformat):
 
 def codingstyle( files, enableReformat ):
 
-    source_patterns = common.get_option('codingstyle-hook.source-patterns', default=['*.cpp','*.cxx','*.c'])
-    header_patterns = common.get_option('codingstyle-hook.header-patterns', default=['*.hpp','*.hxx','*.h'])
-    misc_patterns = common.get_option('codingstyle-hook.misc-patterns', default=['*.cmake','*.txt', '*.xml','*.json'])
+    source_patterns = common.get_option('codingstyle-hook.source-patterns', default='*.cpp *.cxx *.c').split()
+    header_patterns = common.get_option('codingstyle-hook.header-patterns', default='*.hpp *.hxx *.h').split()
+    misc_patterns = common.get_option('codingstyle-hook.misc-patterns', default='*.cmake *.txt *.xml *.json').split()
 
     code_patterns = source_patterns + header_patterns
     include_patterns = code_patterns + misc_patterns
