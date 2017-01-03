@@ -76,7 +76,7 @@ the digraphs hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
 the doyxgen hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
 - **forbidtoken-hooks.copain**: list of file extensions that should be checked for
 the copain hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
-- **filesize-hook.max-size**: set the maximum size of files (default 10485760)
+- **filesize-hook.max-size**: set the maximum size of files (default 1048576)
 - **filesize-hook.type**: `binary` or `all` (default `all`)
 
 Thus to change globally the path to uncrustify, you may call something like:
