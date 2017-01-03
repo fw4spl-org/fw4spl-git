@@ -68,7 +68,7 @@ the end of line hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cm
 the lgpl hook  (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake`)
 - **forbidtoken-hooks.tab**: list of file extensions that should be checked for
 the tab hook  (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py`)
-- **forbidtoken-hooks.oslm_log**: list of file extensions that should be checked for
+- **forbidtoken-hooks.oslmlog**: list of file extensions that should be checked for
 the oslm_log hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
 - **forbidtoken-hooks.digraphs**: list of file extensions that should be checked for
 the digraphs hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
@@ -76,7 +76,7 @@ the digraphs hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
 the doyxgen hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
 - **forbidtoken-hooks.copain**: list of file extensions that should be checked for
 the copain hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
-- **filesize-hook.max_size**: set the maximum size of files (default 10485760)
+- **filesize-hook.max-size**: set the maximum size of files (default 10485760)
 - **filesize-hook.type**: `binary` or `all` (default `all`)
 
 Thus to change globally the path to uncrustify, you may call something like:
