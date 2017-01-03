@@ -7,12 +7,11 @@
 
 example for 10MB limit :
 [filesize-hook]
-max_size = 10485760
+    max-size = 10485760
 
 All files are checked by default. To check only binary files, use the type option :
 [filesize-hook]
-type = binary
-
+    type = binary
 '''
 
 import common

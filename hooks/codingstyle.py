@@ -6,6 +6,12 @@ Make sure you respect the minimal coding rules and gently reformat files for you
 [fw4spl-hooks]
     hooks = codingstyle
 
+[codingstyle-hook]
+    source-patterns = *.cpp *.cxx *.c
+    header-patterns = *.hpp *.hxx *.h
+    misc-patterns = *.cmake *.txt *.xml *.json
+    uncrustify-path=C:\Program files\uncrustify\uncrustify.exe
+
 Available options are :
 source-patterns : file patterns to process as source code files - default to *.cpp *.cxx *.c
 header-patterns : file patterns to process as header files - default to *.hpp *.hxx *.h
@@ -13,11 +19,6 @@ misc-patterns : file patterns to process as non-source code files (build, config
                 Reformatting is limited to TABs and EOL - default to *.options *.cmake *.txt *.xml
 uncrustify-path : path to the uncrustify program - default to uncrustify
 
-[coding-style]
-source-patterns = *.cpp *.cxx *.c
-header-patterns = *.hpp *.hxx *.h
-misc-patterns = *.cmake *.txt *.xml *.json
-uncrustify-path=C:\Program files\uncrustify\uncrustify.exe
 
 """
 

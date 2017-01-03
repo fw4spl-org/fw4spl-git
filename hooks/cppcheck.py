@@ -1,17 +1,15 @@
 """
 Cppcheck your code.
 
-[hooks]
-pretxncommit.cppcheck = python:/path-to/hooks:cppcheck
+.gitconfig configuration :
 
-Available options are :
-cppcheck-path : path to the cppcheck program - default to cppcheck
+[fw4spl-hooks]
+    hooks = cppcheck
 
 [cppcheck]
-source-patterns = *.cpp *.cxx *.c
-header-patterns = *.hpp *.hxx *.h
-cppcheck-path="C:/Program Files/Cppcheck/cppcheck.exe"
-
+    source-patterns = *.cpp *.cxx *.c
+    header-patterns = *.hpp *.hxx *.h
+    cppcheck-path="C:/Program Files/Cppcheck/cppcheck.exe"
 """
 
 import os, sys

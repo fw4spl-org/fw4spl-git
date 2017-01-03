@@ -6,15 +6,16 @@ Make sure you do not commit TAB, CRLF, ... in matching pattern files.
 [fw4spl-hooks]
     hooks = crlf tab digraphs doxygen
 
+[forbidtoken-hooks]
+    crlf= *.cpp *.hpp *.xml
+    lgpl= *.cpp *.hpp *.xml
+    tab= *.cpp *.xml *.py
+
 To do the same check on a server to prevent CRLF/CR from being
 pushed or pulled:
 
 Default file pattern is '*'. To specify patterns to check :
 
-[forbidtoken-hooks]
-crlf= *.cpp *.hpp *.xml
-lgpl= *.cpp *.hpp *.xml
-tab= *.cpp *.xml *.py
 """
 
 import re
@@ -60,7 +61,7 @@ def forbidtoken( files, config_name ):
     token   = tr[config_name][0]
     line_iter = lambda x:enumerate( re.finditer(".*\n", x, re.MULTILINE), 1 )
     line_match = lambda test, x:(n for n,m in line_iter(x) if test(m.group()))
-    
+
     count = 0
     for f in files:
         if not any(f.fnmatch(p) for p in include_patterns):
@@ -79,7 +80,7 @@ def forbidtoken( files, config_name ):
         common.error('Hook "' + config_name + '" failed.')
 
     common.note('%d file(s) checked.' % count)
-    
+
     return abort
 
 hooks = dict(
