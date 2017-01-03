@@ -75,8 +75,8 @@ def check_file(file):
 
 def cppcheck(files):
     abort = False
-    source_patterns = common.get_option('codingstyle-hook.source-patterns', default='*.cpp *.cxx *.c').split()
-    header_patterns = common.get_option('codingstyle-hook.header-patterns', default='*.hpp *.hxx *.h').split()
+    source_patterns = common.get_option('cppcheck-hook.source-patterns', default='*.cpp *.cxx *.c').split()
+    header_patterns = common.get_option('cppcheck-hook.header-patterns', default='*.hpp *.hxx *.h').split()
 
     code_patterns = source_patterns + header_patterns
 
