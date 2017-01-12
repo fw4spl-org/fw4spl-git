@@ -53,7 +53,7 @@ LICENSE = '/\* \*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*\n\
 
 #------------------------------------------------------------------------------
 
-def fix_license_year(file, enableReformat):
+def fix_license_year(file, enableReformat, status):
     strOldFile = open(file, 'rb').read()
 
     common.trace( 'Checking for LGPL license in: ' + file )
@@ -64,10 +64,24 @@ def fix_license_year(file, enableReformat):
         common.error( 'LGPL license header missing in : ' + file + '.' )
         return FormatReturn.Error
 
-    LICENSE_YEAR = r"(.*)FW4SPL - Copyright \(C\) IRCAD, ([0-9]+)-([0-9]+)."
-    LICENSE_YEAR_REPLACE =  r"\1FW4SPL - Copyright (C) IRCAD, \2-"+str(YEAR)+"."
+    LICENSE_YEAR = r"(.*)FW4SPL - Copyright \(C\) IRCAD, ([0-9]+)."
+    LICENSE_YEAR_RANGE = r"(.*)FW4SPL - Copyright \(C\) IRCAD, ([0-9]+)-([0-9]+)."
 
-    strNewFile = re.sub(LICENSE_YEAR, LICENSE_YEAR_REPLACE, strOldFile)
+    strNewFile = strOldFile
+
+    if re.search(LICENSE_YEAR_RANGE, strOldFile):
+        LICENSE_YEAR_REPLACE =  r"\1FW4SPL - Copyright (C) IRCAD, \2-"+str(YEAR)+"."
+        strNewFile = re.sub(LICENSE_YEAR_RANGE, LICENSE_YEAR_REPLACE, strOldFile)
+    elif re.search(LICENSE_YEAR, strOldFile):
+        if status == 'A':
+            LICENSE_YEAR_REPLACE =  r"\1FW4SPL - Copyright (C) IRCAD, "+str(YEAR)+"."
+            strNewFile = re.sub(LICENSE_YEAR, LICENSE_YEAR_REPLACE, strOldFile)
+        else:
+            LICENSE_YEAR_REPLACE =  r"\1FW4SPL - Copyright (C) IRCAD, \2-"+str(YEAR)+"."
+            strNewFile = re.sub(LICENSE_YEAR, LICENSE_YEAR_REPLACE, strOldFile)
+    else:
+        common.error( 'Licence year format in : ' + file + ' is not correct.' )
+        return FormatReturn.Error
 
     if strNewFile != strOldFile:
         if enableReformat:
@@ -85,7 +99,7 @@ def fix_license_year(file, enableReformat):
 
 # Reformat file according to minimal coding-style rules
 # Return True if anything as been modified along with a unified diff
-def format_file(file, enableReformat, code_patterns, header_patterns, misc_patterns, checkLGPL, sortIncludes):
+def format_file(file, enableReformat, code_patterns, header_patterns, misc_patterns, checkLGPL, sortIncludes, status):
 
     diff = ''
 
@@ -118,7 +132,7 @@ def format_file(file, enableReformat, code_patterns, header_patterns, misc_patte
 
         # Fix license year
         if checkLGPL:
-            ret.add( fix_license_year(file, enableReformat) )
+            ret.add( fix_license_year(file, enableReformat, status) )
 
         # Sort headers
         if sortIncludes:
@@ -266,7 +280,7 @@ def codingstyle( files, enableReformat ):
             # Do this last because contents of the file will be modified by uncrustify
             # Thus the variable content will no longer reflect the real content of the file
             file = os.path.join(repoRoot, f.path)
-            res = format_file(file, enableReformat, code_patterns, header_patterns, misc_patterns, checkLGPL, sortIncludes)
+            res = format_file(file, enableReformat, code_patterns, header_patterns, misc_patterns, checkLGPL, sortIncludes, f.status)
             count = count + 1
             if res == FormatReturn.Modified:
                 reformatedList.append(f.path)
