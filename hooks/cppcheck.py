@@ -38,6 +38,9 @@ def check_cppcheck_install():
 
 # Return True if cppcheck find errors in specified file
 def check_file(file):
+    
+    common.note( 'Checking with ' + CPPCHECK_PATH + ' file: ' + file )
+    
     # Invoke cppcheck for source code files
     p = subprocess.Popen([CPPCHECK_PATH, \
                           '--suppress=missingInclude', \
@@ -49,8 +52,13 @@ def check_file(file):
                           file], \
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out, err = p.communicate()
-    print err
-    print out
+    
+    
+    if err != None:
+        print( err )
+        
+    if out != None:
+        print( out )
 
     if p.wait() != 0:
         common.error( 'Cppcheck failure on file: ' + file )
@@ -81,7 +89,12 @@ def cppcheck(files):
     code_patterns = source_patterns + header_patterns
 
     global CPPCHECK_PATH
-    CPPCHECK_PATH = common.get_option('cppcheck-hook.cppcheck-path', default=CPPCHECK_PATH, type='--path').strip()
+    
+    if common.g_cppcheck_path_arg != None and len( common.g_cppcheck_path_arg ) > 0:
+        CPPCHECK_PATH = common.g_cppcheck_path_arg
+    else:
+        CPPCHECK_PATH = common.get_option('cppcheck-hook.cppcheck-path', default=CPPCHECK_PATH, type='--path').strip()
+    
     if check_cppcheck_install():
         common.error('Failed to launch cppcheck.=')
         return True

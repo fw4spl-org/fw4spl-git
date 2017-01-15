@@ -12,7 +12,7 @@ import check_xml
 import cppcheck
 import textwrap
 
-DEFAULT_HOOKS = 'crlf tab filesize oslm_log digraphs codingstyle doxygen copain check_xml'
+DEFAULT_HOOKS = 'crlf tab filesize oslm_log digraphs codingstyle doxygen copain check_xml cppcheck'
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -25,13 +25,18 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-f', '--format', action="store_true", help='Enable code reformatting.')
 parser.add_argument('-v', '--verbose', action="store_true", help='Increase the verbosity level.' )
+parser.add_argument('--with-uncrustify', action='store', dest='uncrustify_path', help='Specify uncrustify path path.')
+parser.add_argument('--with-cppcheck', action='store', dest='cppcheck_path', help='Specify cppcheck path path.')
 parser.add_argument('path', nargs='*', help='Git path, can be a commit or two commits.')
 
 args = parser.parse_args()
 
-common.g_trace = args.verbose
-
 enableReformat = args.format
+
+# Set global option from command line arguments
+common.g_trace = args.verbose
+common.g_cppcheck_path_arg = args.cppcheck_path
+common.g_uncrustify_path_arg = args.uncrustify_path
 
 if len(args.path) > 2:
     print("Invalid git path")
@@ -77,7 +82,7 @@ if files:
     if 'codingstyle' in active_hooks:
 
         common.note("Beautifier phase :")
-        resultCodingstyle, reformatedList = codingstyle.codingstyle(files, enableReformat)
+        resultCodingstyle, reformatedList = codingstyle.codingstyle(files, enableReformat )
         print( '\n' + '*'*120 )
 
     common.note("Check phase :")

@@ -6,7 +6,10 @@ import os, re
 import subprocess
 import fnmatch
 
+# From command line arguments
 g_trace = False
+g_cppcheck_path_arg = None
+g_uncrustify_path_arg = None
 
 class FormatReturn:
     NotModified = 0
