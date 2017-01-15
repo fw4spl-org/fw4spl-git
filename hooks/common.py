@@ -174,3 +174,16 @@ def files_staged_for_commit(rev):
             status,
             path
         )
+        
+def file_on_disk(path):
+    
+    content = open( path, 'r').read()
+    
+    yield FileAtIndex(
+            content,
+            len( content ),
+            '',
+            '',
+            '',
+            path
+    )

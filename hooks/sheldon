@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import os
 
 import common
 
@@ -25,8 +26,9 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-f', '--format', action="store_true", help='Enable code reformatting.')
 parser.add_argument('-v', '--verbose', action="store_true", help='Increase the verbosity level.' )
-parser.add_argument('--with-uncrustify', action='store', dest='uncrustify_path', help='Specify uncrustify path path.')
-parser.add_argument('--with-cppcheck', action='store', dest='cppcheck_path', help='Specify cppcheck path path.')
+parser.add_argument('--with-uncrustify', action='store', dest='uncrustify_path', help='Use uncrustify from path.')
+parser.add_argument('--with-cppcheck', action='store', dest='cppcheck_path', help='Use cppcheck from path.')
+parser.add_argument('-i', '--input', action='store', dest='input_file', help='Check the specific file, staged or not')
 parser.add_argument('path', nargs='*', help='Git path, can be a commit or two commits.')
 
 args = parser.parse_args()
@@ -38,17 +40,24 @@ common.g_trace = args.verbose
 common.g_cppcheck_path_arg = args.cppcheck_path
 common.g_uncrustify_path_arg = args.uncrustify_path
 
-if len(args.path) > 2:
-    print("Invalid git path")
-    exit(1)
-else:
-    if len(args.path) > 1:
-        files = [f for f in common.files_in_rev(args.path[0], args.path[1])]
-    elif len(args.path) > 0:
-        files = [f for f in common.files_in_rev(args.path[0])]
+if args.input_file != None and len( args.input_file ) > 0:
+    if not os.path.isfile( args.input_file ):
+        common.error( 'Cannot find the input file, exiting...' )
+        exit(0)
     else:
-        # "Pre-commit" mode, get the list of staged files
-        files = [f for f in common.files_staged_for_commit(common.current_commit())]
+        files = [f for f in common.file_on_disk( args.input_file )]
+else:
+    if len(args.path) > 2:
+        print("Invalid git path")
+        exit(1)
+    else:
+        if len(args.path) > 1:
+            files = [f for f in common.files_in_rev(args.path[0], args.path[1])]
+        elif len(args.path) > 0:
+            files = [f for f in common.files_in_rev(args.path[0])]
+        else:
+            # "Pre-commit" mode, get the list of staged files
+            files = [f for f in common.files_staged_for_commit(common.current_commit())]
 
 hooks = {}
 hooks.update(forbidtoken.hooks)

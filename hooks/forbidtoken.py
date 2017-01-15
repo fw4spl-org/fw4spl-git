@@ -71,7 +71,7 @@ def forbidtoken( files, config_name ):
             continue
         common.trace('Checking ' + str(f.path) + '...')
         content = f.contents
-        if not common.binary(f.contents) and token(content):
+        if not common.binary(content) and token(content):
             if not abort:
                 common.error(WARNING % (tr[config_name][1]))
             for n in line_match(token, content):
