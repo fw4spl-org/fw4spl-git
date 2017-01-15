@@ -1,3 +1,6 @@
+#!/usr/bin/python2
+# -*- coding: utf-8 -*-
+
 """
 Make sure you respect the minimal coding rules and gently reformat files for you.
 
@@ -22,13 +25,9 @@ uncrustify-path : path to the uncrustify program - default to uncrustify
 
 """
 
-import os, sys
+import os
 import re
 import datetime
-import subprocess
-import hashlib
-import difflib
-import shutil
 import string
 import common
 
@@ -36,7 +35,6 @@ import sortincludes
 
 from common import FormatReturn
 from fnmatch import fnmatch
-from functools import partial
 
 YEAR            = datetime.date.today().year
 SEPARATOR       = '%s\n' % ('-'*79)
@@ -103,8 +101,6 @@ def fix_license_year(file, enableReformat, status):
 # Return True if anything as been modified along with a unified diff
 def format_file(file, enableReformat, code_patterns, header_patterns, misc_patterns, checkLGPL, sortIncludes, status):
 
-    diff = ''
-
     # Invoke uncrustify for source code files
     if any(fnmatch(file, p) for p in code_patterns):
 
@@ -160,7 +156,7 @@ def format_file(file, enableReformat, code_patterns, header_patterns, misc_patte
             return FormatReturn.NotModified
 
         # Something has been changed, write the new file
-        newFile = open(file, 'wb').write(strNewFile)
+        open(file, 'wb').write(strNewFile)
         return FormatReturn.Modified
 
 #------------------------------------------------------------------------------

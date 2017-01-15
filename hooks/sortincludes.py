@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: utf-8 -*-
 
-import os, sys, string
+import os, string
 import re
 
 import common
@@ -71,13 +71,11 @@ def clean_list(includeList):
     includeList.sort()
 
     prevModule = includeList[0][0]
-    prevInclude = includeList[0][1]
     for module,include in includeList:
         if prevModule != module:
             newIncludeList += ['\n']
         newIncludeList += [include]
         prevModule = module
-        prevInclude = include
 
     newIncludeList += ['\n']
     return newIncludeList
@@ -102,12 +100,10 @@ def sort_includes(path, enableReformat):
     content = file.readlines()
     file.close()
 
-    footer = ""
     includes = set()
     firstLine = -1
     lastLine = -1
 
-    currentLine = 0
     outOfInclude = False
 
     for i, line in enumerate(content):

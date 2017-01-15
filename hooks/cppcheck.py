@@ -1,3 +1,6 @@
+#!/usr/bin/python2
+# -*- coding: utf-8 -*-
+
 """
 Cppcheck your code.
 
@@ -12,10 +15,9 @@ Cppcheck your code.
     cppcheck-path="C:/Program Files/Cppcheck/cppcheck.exe"
 """
 
-import os, sys
+import os
 import re
 import subprocess
-import string
 import common
 
 from fnmatch import fnmatch
@@ -58,13 +60,13 @@ def check_file(file):
     if out:
         common.error( 'Cppcheck failure on file: ' + file )
         for line in out.splitlines():
-           words = re.findall('(.+)@!@(.+)@!@(.+)@!@(.+)', line)
-           if(words):
-               num_line = words[0][1]
-               severity = words[0][2]
-               message  = words[0][3]
-               common.error( '[%s] line %s: %s' % (severity, num_line, message) )
-               common.error( SEPARATOR )
+            words = re.findall('(.+)@!@(.+)@!@(.+)@!@(.+)', line)
+            if(words):
+                num_line = words[0][1]
+                severity = words[0][2]
+                message  = words[0][3]
+                common.error( '[%s] line %s: %s' % (severity, num_line, message) )
+                common.error( SEPARATOR )
         return True
 
     return False
@@ -88,7 +90,6 @@ def cppcheck(files):
     for f in files:
         if any(fnmatch(f.path.lower(), p) for p in code_patterns):
 
-            content = f.contents
             if not common.binary(f.contents):
                 file = os.path.join(repoRoot, f.path)
                 abort = check_file(file) or abort

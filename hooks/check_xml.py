@@ -1,3 +1,5 @@
+#!/usr/bin/python2
+# -*- coding: utf-8 -*-
 
 '''hooks to check XML syntax
 
@@ -31,7 +33,7 @@ def check_xml(files):
             content = f.contents
             common.trace('Checking ' + str(f.path) + ' syntax...')
             try:
-                tree = xml_parser(content)
+                xml_parser(content)
             except ET.ParseError as err:
 
                 common.error('XML parsing error in ' + f.path + ' :\n ' + err.msg + '\n.')

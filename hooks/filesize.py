@@ -1,3 +1,6 @@
+#!/usr/bin/python2
+# -*- coding: utf-8 -*-
+
 '''hooks to prevent adding too big binary file
 
 .gitconfig configuration :
@@ -30,7 +33,6 @@ def filesize( files ):
 
     count = 0
     for f in files:
-        content = f.contents
         check_file = check_all_files or common.binary(f.contents)
 
         if check_file:

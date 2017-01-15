@@ -1,3 +1,6 @@
+#!/usr/bin/python2
+# -*- coding: utf-8 -*-
+
 """
 Make sure you do not commit TAB, CRLF, ... in matching pattern files.
 
