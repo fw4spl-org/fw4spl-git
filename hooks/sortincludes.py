@@ -50,7 +50,12 @@ def find_libraries_and_bundles(repo):
     g_libs = []
     g_bundles = []
 
-    for root, dirs, files in os.walk(repo + "/.."):
+    starting_dir = os.path.abspath( repo )
+
+    if starting_dir != os.path.abspath( common.get_repo_root() ):
+        starting_dir = os.path.abspath( repo + "../" )
+
+    for root, dirs, files in os.walk( starting_dir ):
         for file in files:
             if file == "CMakeLists.txt":
                 if re.match('.*Bundles', root):

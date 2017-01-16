@@ -174,16 +174,44 @@ def files_staged_for_commit(rev):
             status,
             path
         )
-        
+
+
+def status_of_file(path):
+    # By default status is set to 'A' like it is a new file.
+    # if the git status is '??' or empty, we guess also that the file is a new file.
+    status = 'A'
+    gitstatus = execute_command('git status --porcelain ' + path)
+
+    if gitstatus.status == 1:
+        warn("File : " + path + " is not in a git repository, sheldon will consider it like a new file")
+    else:
+        out = gitstatus.out.split()
+
+        # if out is not empty and not equal to '??' so we have modified a tracked file.
+        if out and out[0] != '??':
+            status = out[0]
+
+    return status
+
+
 def file_on_disk(path):
-    
-    content = open( path, 'r').read()
+
+    with open( path, 'r' ) as content_file:
+        content = content_file.read()
+
+    stat = os.stat( path )
+    size = stat.st_size
+
+    status = status_of_file( path )
     
     yield FileAtIndex(
             content,
-            len( content ),
+            size,
             '',
             '',
-            '',
+            status,
             path
     )
+
+
+
