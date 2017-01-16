@@ -56,11 +56,16 @@ print '\n' + '*'*120
 if not files:
     common.note ('No file(s) found, exiting...')
     exit(0)
-    
+
 common.note("Files to process :")
 for f in files:
     common.note( '- ' + f.path )
 common.note( '')
+
+# By default, check that lgpl header is not present in source files of private repositories
+checkLGPL = common.is_LGPL_repo()
+if not checkLGPL:
+    DEFAULT_HOOKS += ' lgpl'
 
 active_hooks = common.get_option('fw4spl-hooks.hooks', default=DEFAULT_HOOKS).split()
 common.note ('Enabled hooks: ' + ', '.join(active_hooks))
