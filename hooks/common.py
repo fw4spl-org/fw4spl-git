@@ -37,14 +37,14 @@ class FileAtIndex(object):
 
 def note(msg):
     print('* [Sheldon] ' + msg )
-    
+
 def trace(msg):
     if g_trace:
         print('* [Sheldon] ' + msg )
 
 def error(msg):
     print('*** [ERROR] ' + msg + ' ***')
-    
+
 def warn(msg):
     print('* [Warning] ' + msg + ' *')
 
@@ -203,7 +203,7 @@ def file_on_disk(path):
     size = stat.st_size
 
     status = status_of_file( path )
-    
+
     yield FileAtIndex(
             content,
             size,

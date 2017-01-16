@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 import os, string
@@ -92,7 +92,7 @@ def sort_includes(path, enableReformat):
     except:
         common.warn( 'Failed to find current library for file ' + path + ', includes order might be wrong.\n' )
         cur_lib = '!!NOTFOUND!!'
-    
+
     pathname = os.path.dirname(__file__) + "/"
 
     file = open(pathname + "std_headers.txt", 'r')

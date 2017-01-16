@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 """
@@ -250,9 +250,9 @@ def codingstyle( files, enableReformat ):
 
     checkLGPL = common.is_LGPL_repo()
     sortIncludes = common.get_option('codingstyle-hook.sort-includes', default="true", type='--bool') == "true"
-    
+
     global UNCRUSTIFY_PATH
-    
+
     if common.g_uncrustify_path_arg != None and len( common.g_uncrustify_path_arg ) > 0:
         UNCRUSTIFY_PATH = common.g_uncrustify_path_arg
     else:

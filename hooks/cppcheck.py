@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 """
@@ -38,9 +38,9 @@ def check_cppcheck_install():
 
 # Return True if cppcheck find errors in specified file
 def check_file(file):
-    
+
     common.note( 'Checking with ' + CPPCHECK_PATH + ' file: ' + file )
-    
+
     # Invoke cppcheck for source code files
     p = subprocess.Popen([CPPCHECK_PATH, \
                           '--suppress=missingInclude', \
@@ -52,11 +52,11 @@ def check_file(file):
                           file], \
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out, err = p.communicate()
-    
-    
+
+
     if err != None:
         print( err )
-        
+
     if out != None:
         print( out )
 
@@ -89,12 +89,12 @@ def cppcheck(files):
     code_patterns = source_patterns + header_patterns
 
     global CPPCHECK_PATH
-    
+
     if common.g_cppcheck_path_arg != None and len( common.g_cppcheck_path_arg ) > 0:
         CPPCHECK_PATH = common.g_cppcheck_path_arg
     else:
         CPPCHECK_PATH = common.get_option('cppcheck-hook.cppcheck-path', default=CPPCHECK_PATH, type='--path').strip()
-    
+
     if check_cppcheck_install():
         common.error('Failed to launch cppcheck.=')
         return True
