@@ -50,21 +50,28 @@ def find_libraries_and_bundles(repo):
     g_libs = []
     g_bundles = []
 
-    starting_dir = os.path.abspath( repo )
+    if repo:
 
-    if starting_dir != os.path.abspath( common.get_repo_root() ):
-        starting_dir = os.path.abspath( repo + "../" )
+        starting_dir = os.path.abspath( repo )
 
-    for root, dirs, files in os.walk( starting_dir ):
-        for file in files:
-            if file == "CMakeLists.txt":
-                if re.match('.*Bundles', root):
-                    g_bundles += [os.path.split(root)[1]]
-                elif re.match('.*SrcLib', root):
-                    g_libs += [os.path.split(root)[1]]
+        if starting_dir != os.path.abspath( common.get_repo_root() ):
+            starting_dir = os.path.abspath( repo + "../" )
 
-    g_libs.sort()
-    g_bundles.sort()
+        for root, dirs, files in os.walk( starting_dir ):
+            for file in files:
+                if file == "CMakeLists.txt":
+                    if re.match('.*Bundles', root):
+                        g_bundles += [os.path.split(root)[1]]
+                    elif re.match('.*SrcLib', root):
+                        g_libs += [os.path.split(root)[1]]
+
+        g_libs.sort()
+        g_bundles.sort()
+
+    else:
+
+        common.warn("Cannot find 'fw4spl' repository structure")
+
 
 def clean_list(includeList):
 
