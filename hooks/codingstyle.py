@@ -72,16 +72,18 @@ def fix_license_year(file, enableReformat, status):
     if re.search(LICENSE_YEAR_RANGE, strOldFile):
         LICENSE_YEAR_REPLACE =  r"\1FW4SPL - Copyright (C) IRCAD, \2-"+str(YEAR)+"."
         strNewFile = re.sub(LICENSE_YEAR_RANGE, LICENSE_YEAR_REPLACE, strOldFile)
-    elif re.search(LICENSE_YEAR, strOldFile):
-        if status == 'A':
-            LICENSE_YEAR_REPLACE =  r"\1FW4SPL - Copyright (C) IRCAD, "+str(YEAR)+"."
-            strNewFile = re.sub(LICENSE_YEAR, LICENSE_YEAR_REPLACE, strOldFile)
-        else:
-            LICENSE_YEAR_REPLACE =  r"\1FW4SPL - Copyright (C) IRCAD, \2-"+str(YEAR)+"."
-            strNewFile = re.sub(LICENSE_YEAR, LICENSE_YEAR_REPLACE, strOldFile)
     else:
-        common.error( 'Licence year format in : ' + file + ' is not correct.' )
-        return FormatReturn.Error
+        match = re.search(LICENSE_YEAR, strOldFile)
+        if match:
+            if status == 'A' or match.group(2) == str(YEAR):
+                LICENSE_YEAR_REPLACE =  r"\1FW4SPL - Copyright (C) IRCAD, "+str(YEAR)+"."
+                strNewFile = re.sub(LICENSE_YEAR, LICENSE_YEAR_REPLACE, strOldFile)
+            else:
+                LICENSE_YEAR_REPLACE =  r"\1FW4SPL - Copyright (C) IRCAD, \2-"+str(YEAR)+"."
+                strNewFile = re.sub(LICENSE_YEAR, LICENSE_YEAR_REPLACE, strOldFile)
+        else:
+            common.error( 'Licence year format in : ' + file + ' is not correct.' )
+            return FormatReturn.Error
 
     if strNewFile != strOldFile:
         if enableReformat:
