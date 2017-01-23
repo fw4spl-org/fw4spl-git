@@ -22,7 +22,6 @@ Default file pattern is '*'. To specify patterns to check :
 """
 
 import re
-
 from functools import partial
 
 import common

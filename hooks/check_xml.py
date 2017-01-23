@@ -7,18 +7,19 @@
 pretxncommit.check_xml = python:/path-to/hooks:check_xml
 '''
 
-SEPARATOR = '%s\n' % ('-'*79)
-
 from xml.etree import ElementTree as ET
 
 import common
+
+SEPARATOR = '%s\n' % ('-' * 79)
+
 
 def xml_parser(content):
     try:
         tree = ET.fromstring(content)
     except ET.ParseError as err:
         lineno, column = err.position
-        line = content.splitlines()[lineno-2]
+        line = content.splitlines()[lineno - 2]
         caret = '{:=>{}}'.format('^', column)
         err.msg = '{}\n{}\n{}'.format(err, line, caret)
         raise
@@ -41,7 +42,7 @@ def check_xml(files):
 
     return abort
 
-hooks = {
-        'check_xml':check_xml,
-        }
 
+hooks = {
+    'check_xml': check_xml,
+}

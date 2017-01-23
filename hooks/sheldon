@@ -3,15 +3,14 @@
 
 import argparse
 import os
-
-import common
-
-import forbidtoken
-import filesize
-import codingstyle
-import check_xml
-import cppcheck
 import textwrap
+
+import check_xml
+import codingstyle
+import common
+import cppcheck
+import filesize
+import forbidtoken
 
 DEFAULT_HOOKS = 'crlf tab filesize oslm_log digraphs codingstyle doxygen copain check_xml'
 
@@ -19,13 +18,13 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description='Check and/or reformat code to comply to FW4SPL coding guidelines.',
     epilog=textwrap.dedent('The script works in three different ways depending on the number of paths:\n'
-    '    - If no path is specified, the current staged files are processed.\n'
-    '    - If 1 path is specified, the files modified in the specified path is processed.\n'
-    '    - If 2 paths are specified, the files modified between the two paths are processed.\n')
+                           '    - If no path is specified, the current staged files are processed.\n'
+                           '    - If 1 path is specified, the files modified in the specified path is processed.\n'
+                           '    - If 2 paths are specified, the files modified between the two paths are processed.\n')
 )
 
 parser.add_argument('-f', '--format', action="store_true", help='Enable code reformatting.')
-parser.add_argument('-v', '--verbose', action="store_true", help='Increase the verbosity level.' )
+parser.add_argument('-v', '--verbose', action="store_true", help='Increase the verbosity level.')
 parser.add_argument('--with-uncrustify', action='store', dest='uncrustify_path', help='Use uncrustify from path.')
 parser.add_argument('--with-cppcheck', action='store', dest='cppcheck_path', help='Use cppcheck from path.')
 parser.add_argument('-i', '--input', action='store', dest='input_file', help='Check the specific file, staged or not')
@@ -40,12 +39,12 @@ common.g_trace = args.verbose
 common.g_cppcheck_path_arg = args.cppcheck_path
 common.g_uncrustify_path_arg = args.uncrustify_path
 
-if args.input_file != None and len( args.input_file ) > 0:
-    if not os.path.isfile( args.input_file ):
-        common.error( 'Cannot find the input file, exiting...' )
+if args.input_file != None and len(args.input_file) > 0:
+    if not os.path.isfile(args.input_file):
+        common.error('Cannot find the input file, exiting...')
         exit(0)
     else:
-        files = [f for f in common.file_on_disk( args.input_file )]
+        files = [f for f in common.file_on_disk(args.input_file)]
 else:
     if len(args.path) > 2:
         print("Invalid git path")
@@ -65,16 +64,16 @@ hooks.update(filesize.hooks)
 hooks.update(check_xml.hooks)
 hooks.update(cppcheck.hooks)
 
-print( '\n' + '*'*120 )
+print('\n' + '*' * 120)
 
 if not files:
-    common.note ('No file(s) found, exiting...')
+    common.note('No file(s) found, exiting...')
     exit(0)
 
 common.note("Files to process :")
 for f in files:
-    common.note( '- ' + f.path )
-common.note( '')
+    common.note('- ' + f.path)
+common.note('')
 
 # By default, check that lgpl header is not present in source files of private repositories
 checkLGPL = common.is_LGPL_repo()
@@ -82,60 +81,58 @@ if not checkLGPL:
     DEFAULT_HOOKS += ' lgpl'
 
 active_hooks = common.get_option('fw4spl-hooks.hooks', default=DEFAULT_HOOKS).split()
-common.note ('Enabled hooks: ' + ', '.join(active_hooks))
+common.note('Enabled hooks: ' + ', '.join(active_hooks))
 
-print( '\n' + '*'*120 )
+print('\n' + '*' * 120)
 
 if files:
     reformated = False
     if 'codingstyle' in active_hooks:
-
         common.note("Beautifier phase :")
-        resultCodingstyle, reformatedList = codingstyle.codingstyle(files, enableReformat )
-        print( '\n' + '*'*120 )
+        resultCodingstyle, reformatedList = codingstyle.codingstyle(files, enableReformat)
+        print('\n' + '*' * 120)
 
     common.note("Check phase :")
-    result = [f(files) for name,f in hooks.items() if name in active_hooks]
+    result = [f(files) for name, f in hooks.items() if name in active_hooks]
     result.append(resultCodingstyle)
     result = any(result)
 
-    # User report
-    print( '\n' + '*'*120 )
+    #  User report
+    print('\n' + '*' * 120)
 
-    if(enableReformat):
+    if (enableReformat):
         if result:
             common.error("Check failed !!! Check error messages above.")
             if reformatedList:
                 print
                 common.note("Meanwhile, some files have been reformatted :")
                 for f in reformatedList:
-                    common.note( '- ' + f )
-                common.note( 'Please review changes.' )
+                    common.note('- ' + f)
+                common.note('Please review changes.')
             print
             common.error("Please fix the issues, stage modifications with 'git add' and run 'sheldon' again.")
         else:
             if reformatedList:
                 common.note("Check succeeded, but some files have been reformatted :")
                 for f in reformatedList:
-                    common.note( '- ' + f )
-                common.note( 'Please review and commit changes.' )
+                    common.note('- ' + f)
+                common.note('Please review and commit changes.')
             else:
                 common.note("Check succeeded ! \o/ ")
     else:
         if result or reformatedList:
             common.error("Check failed !!! ")
             if reformatedList:
-                common.error( 'The following file(s) are not correctly formatted:' )
+                common.error('The following file(s) are not correctly formatted:')
                 for f in reformatedList:
-                    common.note( '- ' + f )
+                    common.note('- ' + f)
             common.error("Please fix the issues, stage modifications with 'git add' and run 'sheldon' again.")
 
         else:
             common.note("Check succeeded ! \o/ ")
 
-    print( '*'*120 )
+    print('*' * 120)
 
     exit(result)
 
 exit(0)
-

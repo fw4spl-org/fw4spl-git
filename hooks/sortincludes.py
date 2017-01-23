@@ -1,8 +1,9 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-import os, string
+import os
 import re
+import string
 
 import common
 from common import FormatReturn
@@ -10,8 +11,8 @@ from common import FormatReturn
 g_libs = []
 g_bundles = []
 
-def find_current_library(path):
 
+def find_current_library(path):
     # Just assert first for 'src' or 'include'
     match = re.search('(?:(?:include\/)|(?:src\/)).*', path)
     if match == None:
@@ -33,7 +34,7 @@ def find_current_library(path):
     lib = libPath[-2]
 
     libName = string.split(lib, '/')[-2]
-    if(libName == "tu"):
+    if (libName == "tu"):
         # If we have a unit test, for instance '/home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/io/fwCsvIO/test/tu/CsvReaderTest.hpp'
         # We will get 'tu' instead of the library name and thus we have to skip '/test/tu'
         libName = string.split(lib, '/')[-4]
@@ -42,8 +43,8 @@ def find_current_library(path):
     # We take the second last element split by '/', so in this case 'fwDataCamp'
     return libName
 
-def find_libraries_and_bundles(repo):
 
+def find_libraries_and_bundles(repo):
     global g_libs
     global g_bundles
 
@@ -52,12 +53,12 @@ def find_libraries_and_bundles(repo):
 
     if repo:
 
-        starting_dir = os.path.abspath( repo )
+        starting_dir = os.path.abspath(repo)
 
-        if starting_dir != os.path.abspath( common.get_repo_root() ):
-            starting_dir = os.path.abspath( repo + "../" )
+        if starting_dir != os.path.abspath(common.get_repo_root()):
+            starting_dir = os.path.abspath(repo + "../")
 
-        for root, dirs, files in os.walk( starting_dir ):
+        for root, dirs, files in os.walk(starting_dir):
             for file in files:
                 if file == "CMakeLists.txt":
                     if re.match('.*Bundles', root):
@@ -74,7 +75,6 @@ def find_libraries_and_bundles(repo):
 
 
 def clean_list(includeList):
-
     newIncludeList = []
 
     if len(includeList) == 0:
@@ -83,7 +83,7 @@ def clean_list(includeList):
     includeList.sort()
 
     prevModule = includeList[0][0]
-    for module,include in includeList:
+    for module, include in includeList:
         if prevModule != module:
             newIncludeList += ['\n']
         newIncludeList += [include]
@@ -92,18 +92,18 @@ def clean_list(includeList):
     newIncludeList += ['\n']
     return newIncludeList
 
-def sort_includes(path, enableReformat):
 
+def sort_includes(path, enableReformat):
     try:
         cur_lib = find_current_library(path)
     except:
-        common.warn( 'Failed to find current library for file ' + path + ', includes order might be wrong.\n' )
+        common.warn('Failed to find current library for file ' + path + ', includes order might be wrong.\n')
         cur_lib = '!!NOTFOUND!!'
 
     pathname = os.path.dirname(__file__) + "/"
 
     file = open(pathname + "std_headers.txt", 'r')
-    #file = open("/home/fbridault/dev/hg/hooks/std_headers.txt", 'r')
+    # file = open("/home/fbridault/dev/hg/hooks/std_headers.txt", 'r')
 
     libStd = file.read()
     file.close()
@@ -119,9 +119,10 @@ def sort_includes(path, enableReformat):
     outOfInclude = False
 
     for i, line in enumerate(content):
-        if(re.match("#include", line)):
+        if (re.match("#include", line)):
             if outOfInclude:
-                common.warn( 'Failed to parse includes in file ' + path + ', includes sort is skipped. Maybe there is a #ifdef ? This may be handled in a future version.\n' )
+                common.warn(
+                    'Failed to parse includes in file ' + path + ', includes sort is skipped. Maybe there is a #ifdef ? This may be handled in a future version.\n')
                 return
 
             if firstLine == -1:
@@ -169,10 +170,10 @@ def sort_includes(path, enableReformat):
         matchedHeader = re.sub(extension, ".hpp", filename)
         cpp = True
 
-    for include,module in zip(includes, includeModules):
+    for include, module in zip(includes, includeModules):
 
         if cpp and re.search('".*' + matchedHeader + '.*"', include):
-            ownHeaderInclude +=  [(module, include)]
+            ownHeaderInclude += [(module, include)]
         elif module == cur_lib or re.search('".*"', include):
             currentModuleIncludes += [(module, include)]
         elif module in g_libs:
@@ -186,11 +187,11 @@ def sort_includes(path, enableReformat):
             else:
                 otherIncludes += [(module, include)]
 
-    newIncludes = clean_list(ownHeaderInclude) + clean_list(currentModuleIncludes) + clean_list(libIncludes) + clean_list(bundlesIncludes) + clean_list(otherIncludes) + clean_list(stdIncludes)
-
+    newIncludes = clean_list(ownHeaderInclude) + clean_list(currentModuleIncludes) + clean_list(
+        libIncludes) + clean_list(bundlesIncludes) + clean_list(otherIncludes) + clean_list(stdIncludes)
 
     newContent = []
-    for i,line in enumerate(content):
+    for i, line in enumerate(content):
         if i == firstLine:
             newContent += newIncludes[:-1]
         elif i < firstLine or i > lastLine:
@@ -201,8 +202,7 @@ def sort_includes(path, enableReformat):
             open(path, 'wb').writelines(newContent)
             return FormatReturn.Modified
         else:
-            common.error( 'Include headers are not correctly sorted in file : ' + path + '.' )
+            common.error('Include headers are not correctly sorted in file : ' + path + '.')
             return FormatReturn.Error
 
     return FormatReturn.NotModified
-

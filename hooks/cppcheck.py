@@ -18,14 +18,15 @@ Cppcheck your code.
 import os
 import re
 import subprocess
-import common
-
 from fnmatch import fnmatch
 
-SEPARATOR       = '%s\n' % ('-'*79)
-CPPCHECK_PATH   = 'cppcheck'
+import common
 
-#------------------------------------------------------------------------------
+SEPARATOR = '%s\n' % ('-' * 79)
+CPPCHECK_PATH = 'cppcheck'
+
+
+# ------------------------------------------------------------------------------
 
 # Can we run cppcheck ?
 def check_cppcheck_install():
@@ -34,12 +35,12 @@ def check_cppcheck_install():
 
     return p.wait() != 0
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 
 # Return True if cppcheck find errors in specified file
 def check_file(file):
-
-    common.note( 'Checking with ' + CPPCHECK_PATH + ' file: ' + file )
+    common.note('Checking with ' + CPPCHECK_PATH + ' file: ' + file)
 
     # Invoke cppcheck for source code files
     p = subprocess.Popen([CPPCHECK_PATH, \
@@ -53,33 +54,33 @@ def check_file(file):
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out, err = p.communicate()
 
-
     if err != None:
-        print( err )
+        print(err)
 
     if out != None:
-        print( out )
+        print(out)
 
     if p.wait() != 0:
-        common.error( 'Cppcheck failure on file: ' + file )
-        common.error( 'Aborting' )
+        common.error('Cppcheck failure on file: ' + file)
+        common.error('Aborting')
         return True
 
     if out:
-        common.error( 'Cppcheck failure on file: ' + file )
+        common.error('Cppcheck failure on file: ' + file)
         for line in out.splitlines():
             words = re.findall('(.+)@!@(.+)@!@(.+)@!@(.+)', line)
-            if(words):
+            if (words):
                 num_line = words[0][1]
                 severity = words[0][2]
-                message  = words[0][3]
-                common.error( '[%s] line %s: %s' % (severity, num_line, message) )
-                common.error( SEPARATOR )
+                message = words[0][3]
+                common.error('[%s] line %s: %s' % (severity, num_line, message))
+                common.error(SEPARATOR)
         return True
 
     return False
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 
 def cppcheck(files):
     abort = False
@@ -90,7 +91,7 @@ def cppcheck(files):
 
     global CPPCHECK_PATH
 
-    if common.g_cppcheck_path_arg != None and len( common.g_cppcheck_path_arg ) > 0:
+    if common.g_cppcheck_path_arg != None and len(common.g_cppcheck_path_arg) > 0:
         CPPCHECK_PATH = common.g_cppcheck_path_arg
     else:
         CPPCHECK_PATH = common.get_option('cppcheck-hook.cppcheck-path', default=CPPCHECK_PATH, type='--path').strip()
@@ -109,6 +110,7 @@ def cppcheck(files):
 
     return abort
 
+
 hooks = {
-        'cppcheck':cppcheck,
-        }
+    'cppcheck': cppcheck,
+}
