@@ -228,3 +228,10 @@ def file_on_disk(path):
         status,
         path
     )
+
+
+def directory_on_disk(path):
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            file_path = os.path.join(root, name)
+            yield file_on_disk(file_path).next()
