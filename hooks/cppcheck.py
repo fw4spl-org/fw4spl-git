@@ -54,10 +54,10 @@ def check_file(file):
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out, err = p.communicate()
 
-    if err != None:
+    if err is not None:
         print(err)
 
-    if out != None:
+    if out is not None:
         print(out)
 
     if p.wait() != 0:
@@ -91,7 +91,7 @@ def cppcheck(files):
 
     global CPPCHECK_PATH
 
-    if common.g_cppcheck_path_arg != None and len(common.g_cppcheck_path_arg) > 0:
+    if common.g_cppcheck_path_arg is not None and len(common.g_cppcheck_path_arg) > 0:
         CPPCHECK_PATH = common.g_cppcheck_path_arg
     else:
         CPPCHECK_PATH = common.get_option('cppcheck-hook.cppcheck-path', default=CPPCHECK_PATH, type='--path').strip()

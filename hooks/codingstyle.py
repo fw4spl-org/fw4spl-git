@@ -222,13 +222,13 @@ def fix_header_guard(path, enableReformat):
                     return FormatReturn.Error
 
         match = re.search('#define +' + expectedGuard, content, re.MULTILINE)
-        if match == None:
+        if match is None:
             common.error("Can't find #define header guard matching : " + expectedGuard)
             common.error(FILEWARN(path))
             return FormatReturn.Error
 
         match = re.search('#endif */[/\*] *' + expectedGuard + '(?:.*\*/)?', content, re.MULTILINE)
-        if match == None:
+        if match is None:
             common.error("Can't find #endif with a comment matching the header guard  : " + expectedGuard + "\n")
             common.error(FILEWARN(path))
             return FormatReturn.Error
@@ -238,7 +238,7 @@ def fix_header_guard(path, enableReformat):
 
 # ------------------------------------------------------------------------------
 
-def codingstyle(files, enableReformat):
+def codingstyle(files, enableReformat, checkLGPL ):
     source_patterns = common.get_option('codingstyle-hook.source-patterns', default='*.cpp *.cxx *.c').split()
     header_patterns = common.get_option('codingstyle-hook.header-patterns', default='*.hpp *.hxx *.h').split()
     misc_patterns = common.get_option('codingstyle-hook.misc-patterns', default='*.cmake *.txt *.xml *.json').split()
@@ -246,12 +246,11 @@ def codingstyle(files, enableReformat):
     code_patterns = source_patterns + header_patterns
     include_patterns = code_patterns + misc_patterns
 
-    checkLGPL = common.is_LGPL_repo()
     sortIncludes = common.get_option('codingstyle-hook.sort-includes', default="true", type='--bool') == "true"
 
     global UNCRUSTIFY_PATH
 
-    if common.g_uncrustify_path_arg != None and len(common.g_uncrustify_path_arg) > 0:
+    if common.g_uncrustify_path_arg is not None and len(common.g_uncrustify_path_arg) > 0:
         UNCRUSTIFY_PATH = common.g_uncrustify_path_arg
     else:
         UNCRUSTIFY_PATH = common.get_option('codingstyle-hook.uncrustify-path', default=UNCRUSTIFY_PATH,
@@ -286,10 +285,10 @@ def codingstyle(files, enableReformat):
             file = os.path.join(repoRoot, f.path)
             res = format_file(file, enableReformat, code_patterns, header_patterns, misc_patterns, checkLGPL,
                               sortIncludes, f.status)
-            count = count + 1
+            count += 1
             if res == FormatReturn.Modified:
                 reformatedList.append(f.path)
-                countReformat = countReformat + 1
+                countReformat += 1
             elif res == FormatReturn.Error:
                 # Error in reformatting
                 ret = True

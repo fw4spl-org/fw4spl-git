@@ -26,43 +26,42 @@ from functools import partial
 
 import common
 
-CRLF    = lambda x : '\r\n' in x
-CR      = lambda x : '\r' in x
-TAB     = lambda x : '\t' in x
-LGPL    = lambda x : 'Lesser General Public License' in x
-BSD     = lambda x : 'under the terms of the BSD Licence' in x
-SLM_LOG = lambda x : bool(
-        ('O''SLM_LOG' in x) and not (re.search('#define O''SLM_LOG', x) and x.count('O''SLM_LOG') == 1)
-        )
-DIGRAPH = lambda x : "<:" in x or ":>" in x
-DOXYGEN = lambda x : '* @class' in x or '* @date' in x or '* @namespace' in x
-COPAIN = lambda x : 'copain' in x
+CRLF = lambda x: '\r\n' in x
+CR = lambda x: '\r' in x
+TAB = lambda x: '\t' in x
+LGPL = lambda x: 'Lesser General Public License' in x
+BSD = lambda x: 'under the terms of the BSD Licence' in x
+SLM_LOG = lambda x: bool(
+    ('O''SLM_LOG' in x) and not (re.search('#define O''SLM_LOG', x) and x.count('O''SLM_LOG') == 1)
+)
+DIGRAPH = lambda x: "<:" in x or ":>" in x or "%:" in x or "<%" in x or "%>" in x
+DOXYGEN = lambda x: '* @class' in x or '* @date' in x or '* @namespace' in x
+COPAIN = lambda x: 'copain' in x
 
 tr = {
-               'crlf' : (CRLF    , 'CRLF line endings'                     , '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py' ),
-                 'cr' : (CR      , 'CR line endings'                       , '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py' ),
-                'tab' : (TAB     , 'TAB'                                   , '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py' ),
-               'lgpl' : (LGPL    , 'LGPL Header'                           , '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake' ),
-                'bsd' : (BSD     , 'BSD Header'                            , '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake' ),
-            'oslmlog' : (SLM_LOG , 'O''SLM_LOG'                            , '*.cpp *.hpp *.hxx *.cxx *.c *.h' ),
-           'digraphs' : (DIGRAPH , 'Forbiden digraphs: <'':, :''>'         , '*.cpp *.hpp *.hxx *.cxx *.c *.h' ),
-            'doxygen' : (DOXYGEN , '@class @date @namespace doxygen tag(s)', '*.cpp *.hpp *.hxx *.cxx *.c *.h' ),
-             'copain' : (COPAIN  , 'copain'                                , '*.cpp *.hpp *.hxx *.cxx *.c *.h' ),
-     }
+    'crlf': (CRLF, 'CRLF line endings', '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py'),
+    'cr': (CR, 'CR line endings', '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py'),
+    'tab': (TAB, 'TAB', '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py'),
+    'lgpl': (LGPL, 'LGPL Header', '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake'),
+    'bsd': (BSD, 'BSD Header', '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake'),
+    'oslmlog': (SLM_LOG, 'O''SLM_LOG', '*.cpp *.hpp *.hxx *.cxx *.c *.h'),
+    'digraphs': (DIGRAPH, 'Forbiden digraphs: <'':, :''>', '*.cpp *.hpp *.hxx *.cxx *.c *.h'),
+    'doxygen': (DOXYGEN, '@class @date @namespace doxygen tag(s)', '*.cpp *.hpp *.hxx *.cxx *.c *.h'),
+    'copain': (COPAIN, 'copain', '*.cpp *.hpp *.hxx *.cxx *.c *.h'),
+}
+
+WARNING = ('Attempt to commit or push text file(s) containing "%s"')
+FILEWARN = ('   - %s:%s')
 
 
-WARNING   = ('Attempt to commit or push text file(s) containing "%s"')
-FILEWARN  = ('   - %s:%s')
-
-def forbidtoken( files, config_name ):
-
+def forbidtoken(files, config_name):
     include_patterns = common.get_option('forbidtoken-hook.' + config_name, default=tr[config_name][2]).split()
 
     common.note('Checking for "' + config_name + '" tokens on ' + ', '.join(include_patterns) + ' files')
-    abort   = False
-    token   = tr[config_name][0]
-    line_iter = lambda x:enumerate( re.finditer(".*\n", x, re.MULTILINE), 1 )
-    line_match = lambda test, x:(n for n,m in line_iter(x) if test(m.group()))
+    abort = False
+    token = tr[config_name][0]
+    line_iter = lambda x: enumerate(re.finditer(".*\n", x, re.MULTILINE), 1)
+    line_match = lambda test, x: (n for n, m in line_iter(x) if test(m.group()))
 
     count = 0
     for f in files:
@@ -76,7 +75,7 @@ def forbidtoken( files, config_name ):
             for n in line_match(token, content):
                 common.error(FILEWARN % (f.path, n))
             abort = True
-        count = count + 1
+        count += 1
 
     if abort:
         common.error('Hook "' + config_name + '" failed.')
@@ -85,7 +84,7 @@ def forbidtoken( files, config_name ):
 
     return abort
 
-hooks = dict(
-        [ (name, partial(forbidtoken, config_name = name)) for name in tr ]
-        )
 
+hooks = dict(
+    [(name, partial(forbidtoken, config_name=name)) for name in tr]
+)

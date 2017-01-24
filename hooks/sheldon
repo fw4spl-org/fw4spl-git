@@ -123,7 +123,7 @@ if files:
     reformated = False
     if 'codingstyle' in active_hooks:
         common.note("Beautifier phase :")
-        resultCodingstyle, reformatedList = codingstyle.codingstyle(files, enableReformat)
+        resultCodingstyle, reformatedList = codingstyle.codingstyle(files, enableReformat, common.is_LGPL_repo())
         print('\n' + '*' * 120)
 
     common.note("Check phase :")
