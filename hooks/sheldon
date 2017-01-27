@@ -17,10 +17,17 @@ DEFAULT_HOOKS = 'crlf tab filesize oslm_log digraphs codingstyle doxygen copain 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description='Check and/or reformat code to comply to FW4SPL coding guidelines.',
-    epilog=textwrap.dedent('The script works in three different ways depending on the number of paths:\n'
+    epilog=textwrap.dedent('The script works on git staged/modified files or directly on file/directory:\n'
+                           '\n'
+                           '  For git mode, in three different ways depending on the number of paths:\n'
                            '    - If no path is specified, the current staged files are processed.\n'
                            '    - If 1 path is specified, the files modified in the specified path is processed.\n'
-                           '    - If 2 paths are specified, the files modified between the two paths are processed.\n')
+                           '    - If 2 paths are specified, the files modified between the two paths are processed.\n'
+                           '\n'
+                           '  For file/directory mode, using the --input argument:\n'
+                           '    - If the argument is a file, only this file will be checked.\n'
+                           '    - If the argument is a directory, Sheldon will recursively check all files within this directory.\n'
+                           )
 )
 
 parser.add_argument('-f', '--format',
@@ -59,7 +66,11 @@ common.g_trace = args.verbose
 common.g_cppcheck_path_arg = args.cppcheck_path
 common.g_uncrustify_path_arg = args.uncrustify_path
 
-if len(args.input_path) > 0:
+if args.input_path is not None and len(args.input_path) > 0:
+    # Double check path argument
+    if args.path is not None or len(args.path) > 0:
+        common.warn('--input is used, path argument will be ignored.')
+
     # Cleanup the path
     file_path = os.path.realpath(args.input_path)
 
