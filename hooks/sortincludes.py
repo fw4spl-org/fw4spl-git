@@ -51,20 +51,18 @@ def find_libraries_and_bundles(repo):
     g_libs = []
     g_bundles = []
 
-    if repo:
+    if repo is not None:
 
-        starting_dir = os.path.abspath(repo)
-
-        if starting_dir != os.path.abspath(common.get_repo_root()):
-            starting_dir = os.path.abspath(repo + "../")
-
-        for root, dirs, files in os.walk(starting_dir):
-            for file in files:
-                if file == "CMakeLists.txt":
-                    if re.match('.*Bundles', root):
-                        g_bundles += [os.path.split(root)[1]]
-                    elif re.match('.*SrcLib', root):
-                        g_libs += [os.path.split(root)[1]]
+        for root, dirs, files in os.walk(repo + "/.."):
+            rootdir = os.path.split(root)[1]
+            # Do not inspect hidden folders
+            if not rootdir.startswith("."):
+                for file in files:
+                    if file == "CMakeLists.txt":
+                        if re.match('.*Bundles', root):
+                            g_bundles += [rootdir]
+                        elif re.match('.*SrcLib', root):
+                            g_libs += [rootdir]
 
         g_libs.sort()
         g_bundles.sort()
@@ -80,7 +78,7 @@ def clean_list(includeList):
     if len(includeList) == 0:
         return newIncludeList
 
-    includeList.sort()
+    includeList.sort(key=lambda s: s[1].lower())
 
     prevModule = includeList[0][0]
     for module, include in includeList:
@@ -103,7 +101,6 @@ def sort_includes(path, enableReformat):
     pathname = os.path.dirname(__file__) + "/"
 
     file = open(pathname + "std_headers.txt", 'r')
-    # file = open("/home/fbridault/dev/hg/hooks/std_headers.txt", 'r')
 
     libStd = file.read()
     file.close()
