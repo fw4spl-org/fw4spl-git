@@ -8,6 +8,8 @@
 
 #include <fwB/Bb.hpp>
 
+#include <UPPERCASE/Lib.cpp>
+
 #include <fwC/Ca.hpp>
 
 #include "fwA/Aa.hpp"

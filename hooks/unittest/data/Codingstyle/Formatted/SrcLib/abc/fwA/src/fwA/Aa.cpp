@@ -11,6 +11,8 @@
 
 #include <fwC/Ca.hpp>
 
+#include <UPPERCASE/Lib.cpp>
+
 #include <iostream>
 
 namespace fwA
