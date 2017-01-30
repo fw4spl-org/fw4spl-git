@@ -1,49 +1,107 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 
 import argparse
-
-import common
-
-import forbidtoken
-import filesize
-import codingstyle
-import check_xml
-import cppcheck
+import os
 import textwrap
+
+import check_xml
+import codingstyle
+import common
+import cppcheck
+import filesize
+import forbidtoken
 
 DEFAULT_HOOKS = 'crlf tab filesize oslm_log digraphs codingstyle doxygen copain check_xml'
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description='Check and/or reformat code to comply to FW4SPL coding guidelines.',
-    epilog=textwrap.dedent('The script works in three different ways depending on the number of paths:\n'
-    '    - If no path is specified, the current staged files are processed.\n'
-    '    - If 1 path is specified, the files modified in the specified path is processed.\n'
-    '    - If 2 paths are specified, the files modified between the two paths are processed.\n')
+    epilog=textwrap.dedent('The script works on git staged/modified files or directly on file/directory:\n'
+                           '\n'
+                           '  For git mode, in three different ways depending on the number of paths:\n'
+                           '    - If no path is specified, the current staged files are processed.\n'
+                           '    - If 1 path is specified, the files modified in the specified path is processed.\n'
+                           '    - If 2 paths are specified, the files modified between the two paths are processed.\n'
+                           '\n'
+                           '  For file/directory mode, using the --input argument:\n'
+                           '    - If the argument is a file, only this file will be checked.\n'
+                           '    - If the argument is a directory, Sheldon will recursively check all files within this directory.\n'
+                           )
 )
 
-parser.add_argument('-f', '--format', action="store_true", help='Enable code reformatting.')
-parser.add_argument('-v', '--verbose', action="store_true", help='Increase the verbosity level.' )
-parser.add_argument('path', nargs='*', help='Git path, can be a commit or two commits.')
+parser.add_argument('-f', '--format',
+                    action="store_true",
+                    help='Enable code reformatting.')
+
+parser.add_argument('-v', '--verbose',
+                    action="store_true",
+                    help='Increase the verbosity level.')
+
+parser.add_argument('--with-uncrustify',
+                    action='store',
+                    dest='uncrustify_path',
+                    help='Use uncrustify from path.')
+
+parser.add_argument('--with-cppcheck',
+                    action='store',
+                    dest='cppcheck_path',
+                    help='Use cppcheck from path.')
+
+parser.add_argument('-i', '--input',
+                    action='store',
+                    dest='input_path',
+                    help='Check the specific file/directory, staged or not. Recursive when the argument is a directory')
+
+parser.add_argument('path',
+                    nargs='*',
+                    help='Git path, can be a commit or two commits.')
 
 args = parser.parse_args()
 
-common.g_trace = args.verbose
-
 enableReformat = args.format
 
-if len(args.path) > 2:
-    print("Invalid git path")
-    exit(1)
-else:
-    if len(args.path) > 1:
-        files = [f for f in common.files_in_rev(args.path[0], args.path[1])]
-    elif len(args.path) > 0:
-        files = [f for f in common.files_in_rev(args.path[0])]
+# Set global option from command line arguments
+common.g_trace = args.verbose
+common.g_cppcheck_path_arg = args.cppcheck_path
+common.g_uncrustify_path_arg = args.uncrustify_path
+
+if args.input_path is not None and len(args.input_path) > 0:
+    # Double check path argument
+    if args.path is not None or len(args.path) > 0:
+        common.warn('--input is used, path argument will be ignored.')
+
+    # Cleanup the path
+    file_path = os.path.realpath(args.input_path)
+
+    if os.path.isdir(file_path):
+        # Change the current working dir so we can correctly detect a 'fw4spl' repository structure
+        os.chdir(file_path)
+
+        # Execute hooks on files
+        files = [f for f in common.directory_on_disk(file_path)]
+    elif os.path.isfile(file_path):
+        # Change the current working dir so we can correctly detect a 'fw4spl' repository structure
+        dir_path = os.path.dirname(file_path)
+        os.chdir(dir_path)
+
+        # Execute hooks on files
+        files = [f for f in common.file_on_disk(file_path)]
     else:
-        # "Pre-commit" mode, get the list of staged files
-        files = [f for f in common.files_staged_for_commit(common.current_commit())]
+        common.error('Cannot find the input file/directory, exiting...')
+        exit(0)
+else:
+    if len(args.path) > 2:
+        print("Invalid git path")
+        exit(1)
+    else:
+        if len(args.path) > 1:
+            files = [f for f in common.files_in_rev(args.path[0], args.path[1])]
+        elif len(args.path) > 0:
+            files = [f for f in common.files_in_rev(args.path[0])]
+        else:
+            # "Pre-commit" mode, get the list of staged files
+            files = [f for f in common.files_staged_for_commit(common.current_commit())]
 
 hooks = {}
 hooks.update(forbidtoken.hooks)
@@ -51,16 +109,16 @@ hooks.update(filesize.hooks)
 hooks.update(check_xml.hooks)
 hooks.update(cppcheck.hooks)
 
-print '\n' + '*'*120
+print('\n' + '*' * 120)
 
 if not files:
-    common.note ('No file(s) found, exiting...')
+    common.note('No file(s) found, exiting...')
     exit(0)
 
 common.note("Files to process :")
 for f in files:
-    common.note( '- ' + f.path )
-common.note( '')
+    common.note('- ' + f.path)
+common.note('')
 
 # By default, check that lgpl header is not present in source files of private repositories
 checkLGPL = common.is_LGPL_repo()
@@ -68,60 +126,58 @@ if not checkLGPL:
     DEFAULT_HOOKS += ' lgpl'
 
 active_hooks = common.get_option('fw4spl-hooks.hooks', default=DEFAULT_HOOKS).split()
-common.note ('Enabled hooks: ' + ', '.join(active_hooks))
+common.note('Enabled hooks: ' + ', '.join(active_hooks))
 
-print '\n' + '*'*120
+print('\n' + '*' * 120)
 
 if files:
     reformated = False
     if 'codingstyle' in active_hooks:
-
         common.note("Beautifier phase :")
-        resultCodingstyle, reformatedList = codingstyle.codingstyle(files, enableReformat)
-        print '\n' + '*'*120
+        resultCodingstyle, reformatedList = codingstyle.codingstyle(files, enableReformat, common.is_LGPL_repo())
+        print('\n' + '*' * 120)
 
     common.note("Check phase :")
-    result = [f(files) for name,f in hooks.items() if name in active_hooks]
+    result = [f(files) for name, f in hooks.items() if name in active_hooks]
     result.append(resultCodingstyle)
     result = any(result)
 
-    # User report
-    print '\n' + '*'*120
+    #  User report
+    print('\n' + '*' * 120)
 
-    if(enableReformat):
+    if (enableReformat):
         if result:
             common.error("Check failed !!! Check error messages above.")
             if reformatedList:
                 print
                 common.note("Meanwhile, some files have been reformatted :")
                 for f in reformatedList:
-                    common.note( '- ' + f )
-                common.note( 'Please review changes.' )
+                    common.note('- ' + f)
+                common.note('Please review changes.')
             print
             common.error("Please fix the issues, stage modifications with 'git add' and run 'sheldon' again.")
         else:
             if reformatedList:
                 common.note("Check succeeded, but some files have been reformatted :")
                 for f in reformatedList:
-                    common.note( '- ' + f )
-                common.note( 'Please review and commit changes.' )
+                    common.note('- ' + f)
+                common.note('Please review and commit changes.')
             else:
                 common.note("Check succeeded ! \o/ ")
     else:
         if result or reformatedList:
             common.error("Check failed !!! ")
             if reformatedList:
-                common.error( 'The following file(s) are not correctly formatted:' )
+                common.error('The following file(s) are not correctly formatted:')
                 for f in reformatedList:
-                    common.note( '- ' + f )
+                    common.note('- ' + f)
             common.error("Please fix the issues, stage modifications with 'git add' and run 'sheldon' again.")
 
         else:
             common.note("Check succeeded ! \o/ ")
 
-    print '*'*120
+    print('*' * 120)
 
     exit(result)
 
 exit(0)
-

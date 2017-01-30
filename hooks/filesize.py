@@ -1,3 +1,6 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+
 '''hooks to prevent adding too big binary file
 
 .gitconfig configuration :
@@ -16,13 +19,14 @@ All files are checked by default. To check only binary files, use the type optio
 
 import common
 
-WARNING   = ('Attempt to commit or push too big file(s). '
-              'Limit is: %s bytes')
-FILEWARN  = ('   - %s, %s > %s')
+WARNING = ('Attempt to commit or push too big file(s). '
+           'Limit is: %s bytes')
+FILEWARN = ('   - %s, %s > %s')
 
-def filesize( files ):
+
+def filesize(files):
     abort = False
-    limit = int(common.get_option('filesize-hook.max-size', default=1024**2))
+    limit = int(common.get_option('filesize-hook.max-size', default=1024 ** 2))
     check_all_files = common.get_option('filesize-hook.type', "all").strip().lower() != "binary"
     too_big_files = []
 
@@ -30,7 +34,6 @@ def filesize( files ):
 
     count = 0
     for f in files:
-        content = f.contents
         check_file = check_all_files or common.binary(f.contents)
 
         if check_file:
@@ -49,11 +52,11 @@ def filesize( files ):
                 f.path,
                 f.size,
                 limit
-                ))
+            ))
         abort = True
     return abort
 
-hooks = {
-        'filesize':filesize,
-        }
 
+hooks = {
+    'filesize': filesize,
+}

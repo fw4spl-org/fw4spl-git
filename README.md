@@ -61,7 +61,7 @@ Available options are:
 - **cppcheck-hook.cppcheck-path**: path to the cppcheck binary (default to `cppcheck`, which means it should be in the global `PATH`)
 - **cppcheck-hook.source-patterns**: list of files extensions matching source files (default: `*.cpp *.cxx *.c`)
 - **cppcheck-hook.header-patterns**: list of files extensions matching header files (default: `*.hpp *.hxx *.h`)
-- **fw4spl-hooks.hooks**: list of enables hooks amongst `crlf tab filesize oslm_log digraphs codingstyle doxygen copain check_xml cppcheck`
+- **fw4spl-hooks.hooks**: list of enables hooks amongst `crlf tab filesize oslmlog digraphs codingstyle doxygen copain check_xml cppcheck`
 - **forbidtoken-hooks.crlf**: list of file extensions that should be checked for
 the end of line hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py`)
 - **forbidtoken-hooks.lgpl**: list of file extensions that should be checked for

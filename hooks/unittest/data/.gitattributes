@@ -1,0 +1,3 @@
+forbidtoken_crlf.cpp eol=crlf
+forbidtoken_lf.cpp eol=lf
+forbidtoken_cr.cpp eol=cr
