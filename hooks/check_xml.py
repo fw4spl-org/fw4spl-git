@@ -1,11 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-'''hooks to check XML syntax
+"""
+
+hooks to check XML syntax
 
 [hooks]
 pretxncommit.check_xml = python:/path-to/hooks:check_xml
-'''
+
+"""
 
 from xml.etree import ElementTree as ET
 
@@ -18,8 +21,8 @@ def xml_parser(content):
     try:
         tree = ET.fromstring(content)
     except ET.ParseError as err:
-        lineno, column = err.position
-        line = content.splitlines()[lineno - 2]
+        line_number, column = err.position
+        line = content.splitlines()[line_number - 2]
         caret = '{:=>{}}'.format('^', column)
         err.msg = '{}\n{}\n{}'.format(err, line, caret)
         raise
