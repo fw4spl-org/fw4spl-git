@@ -94,19 +94,19 @@ def __check_commit_author(commit_hash, commit_author):
 
 
 def check_commit_messages(commit_messages):
-    results = []
+    results = [False]
 
     for commit_message in commit_messages:
         # Split commit message according to "--pretty=format:%h:%aE:%s"
         split_message = commit_message.split(':', 2)
 
-        # Extract the type
-        commit_hash = split_message[0]
-        commit_author = split_message[1]
-        commit_title = split_message[2]
+        if len(split_message) == 3:
+            # Extract the type
+            commit_hash = split_message[0]
+            commit_author = split_message[1]
+            commit_title = split_message[2]
 
-        results.append(__check_commit_title(commit_hash, commit_title))
-
-        results.append(__check_commit_author(commit_hash, commit_author))
+            results.append(__check_commit_title(commit_hash, commit_title))
+            results.append(__check_commit_author(commit_hash, commit_author))
 
     return results
