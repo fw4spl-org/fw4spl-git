@@ -39,7 +39,7 @@ from common import FormatReturn
 
 YEAR = datetime.date.today().year
 SEPARATOR = '%s\n' % ('-' * 79)
-FILEWARN = lambda x: ('  - %s') % os.path.relpath(x, repoRoot)
+FILEWARN = lambda x: ('  - %s') % os.path.relpath(x, common.get_repo_root())
 UNCRUSTIFY_PATH = 'uncrustify'
 BACKUP_LIST_FILE = 'backupList'
 
