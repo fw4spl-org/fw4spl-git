@@ -13,7 +13,7 @@ class _Const(object):
             raise TypeError
 
         def fget(self):
-            return ['feat', 'fix', 'perf', 'revert', 'docs', 'chore', 'style', 'refactor', 'test']
+            return ['feat', 'fix', 'perf', 'revert', 'docs', 'chore', 'style', 'refactor', 'test', 'merge']
 
         return property(**locals())
 
