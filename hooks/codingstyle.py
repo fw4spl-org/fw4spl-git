@@ -14,6 +14,7 @@ Make sure you respect the minimal coding rules and gently reformat files for you
     header-patterns = *.hpp *.hxx *.h
     misc-patterns = *.cmake *.txt *.xml *.json
     uncrustify-path=C:\Program files\uncrustify\uncrustify.exe
+    additional-projects = "D:/Dev/src/fw4spl-ar;D:/Dev/src/fw4spl-ext"
 
 Available options are :
 source-patterns : file patterns to process as source code files - default to *.cpp *.cxx *.c
@@ -21,7 +22,8 @@ header-patterns : file patterns to process as header files - default to *.hpp *.
 misc-patterns : file patterns to process as non-source code files (build, configuration, etc...)
                 Reformatting is limited to TABs and EOL - default to *.options *.cmake *.txt *.xml
 uncrustify-path : path to the uncrustify program - default to uncrustify
-
+additional-projects : additional fw4spl repositories paths used to sort includes (separated with a ;).
+                      default parent folder of the current repository.
 
 """
 
@@ -247,7 +249,27 @@ def codingstyle(files, enableReformat, checkLGPL ):
     include_patterns = code_patterns + misc_patterns
 
     sortIncludes = common.get_option('codingstyle-hook.sort-includes', default="true", type='--bool') == "true"
+    global repoRoot
+    repoRoot = common.get_repo_root()
+    
+    if repoRoot is None:
+        common.warn("Cannot find 'fw4spl' repository structure")
+        parent_repo = ""
+    else:
+        parent_repo = os.path.abspath(os.path.join(repoRoot, os.pardir))
 
+    fw4spl_projects = common.get_option('codingstyle-hook.additional-projects', default="").split(";")
+    if not fw4spl_projects:
+        # no additional-projects specified in config file. Default is parent repository folder
+        fw4spl_projects.append(parent_repo)
+    else:
+        # adds current repository folder to the additional-projects specified in config file.
+        fw4spl_projects.append(repoRoot)
+        # normalize pathname
+        fw4spl_projects = map(os.path.normpath, fw4spl_projects)
+        # remove duplicates
+        fw4spl_projects = list(set(fw4spl_projects))
+        
     global UNCRUSTIFY_PATH
 
     if common.g_uncrustify_path_arg is not None and len(common.g_uncrustify_path_arg) > 0:
@@ -265,10 +287,7 @@ def codingstyle(files, enableReformat, checkLGPL ):
     checked = set()
 
     reformatedList = []
-    global repoRoot
-    repoRoot = common.get_repo_root()
-
-    sortincludes.find_libraries_and_bundles(repoRoot)
+    sortincludes.find_libraries_and_bundles(fw4spl_projects)
 
     ret = False
     count = 0
