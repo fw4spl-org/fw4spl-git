@@ -4,10 +4,14 @@ Git tools to manage contributions in fw4spl
 ## Sheldon
 
 Sheldon is a tool that allows to check that files or commits respect our [coding
-guidelines](http://fw4spl.readthedocs.io/en/fw4spl_0.11.0/CodingStyle/index.html).
+guidelines](http://fw4spl.readthedocs.io/en/11.0.4//CodingStyle/index.html).
 
 ```
-usage: sheldon [-h] [-f] [-v] [path [path ...]]
+usage: sheldon [-h] [-f] [-v] [--with-uncrustify UNCRUSTIFY_PATH]
+               [--with-cppcheck CPPCHECK_PATH] [-i INPUT_PATH]
+               [path [path ...]]
+
+Check and/or reformat code to comply to FW4SPL coding guidelines.
 
 positional arguments:
   path           Git path, can be a commit or two commits.
@@ -16,14 +20,28 @@ optional arguments:
   -h, --help     show this help message and exit
   -f, --format   Enable code reformatting.
   -v, --verbose  Increase the verbosity level.
+  --with-uncrustify UNCRUSTIFY_PATH
+                        Use uncrustify from path.
+  --with-cppcheck CPPCHECK_PATH
+                        Use cppcheck from path.
+  -i INPUT_PATH, --input INPUT_PATH
+                        Check the specific file/directory, staged or not.
+                        Recursive when the argument is a directory
 ```
 
-It can be invoked in three different ways, depending on the number of paths:
-- If no path is specified, the current staged files are processed.
-- If 1 path is specified, the files modified in the specified path is processed.
-- If 2 paths are specified, the files modified between the two paths are processed.
+The script works on git staged/modified files or directly on file/directory:
 
-Example 1:
+- For git mode, in three different ways depending on the number of paths:
+ - If no path is specified, the current staged files are processed.
+ - If 1 path is specified, the files modified in the specified path is processed.
+ - If 2 paths are specified, the files modified between the two paths are processed.
+
+
+- For file/directory mode, using the --input argument:
+ - If the argument is a file, only this file will be checked.
+ - If the argument is a directory, Sheldon will recursively check all files within this directory.
+
+**Example 1:**
 
 ```sh
 vim main.cpp
@@ -33,7 +51,7 @@ sheldon -f
 
 checks and modifies the file `main.cpp` to comply to our rules.
 
-Example 2:
+**Example 2:**
 
 ```sh
 sheldon 511c628^!
@@ -41,7 +59,7 @@ sheldon 511c628^!
 
 check files modified in the commit 511c628.
 
-Example 3:
+**Example 3:**
 
 ```sh
 sheldon 124e8415 511c628
@@ -49,10 +67,21 @@ sheldon 124e8415 511c628
 
 check files modified between commits 124e8415 and 511c628.
 
+**Example 4:**
+
+```sh
+sheldon -i main.cpp
+```
+
+checks the file `main.cpp` (current local version).
+
+-----
+
 Sheldon configuration is stored in git config files, so you can have global,
 user or repository specific settings.
 
-Available options are:
+**Available options are:**
+
 - **codingstyle-hook.uncrustify-path**: path to the uncrustify binary (default to `uncrustify`, which means it should be in the global `PATH`)
 - **codingstyle-hook.source-patterns**: list of files extensions matching source files (default: `*.cpp *.cxx *.c`)
 - **codingstyle-hook.header-patterns**: list of files extensions matching header files (default: `*.hpp *.hxx *.h`)
