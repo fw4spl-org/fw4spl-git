@@ -34,7 +34,7 @@ BSD = lambda x: 'under the terms of the BSD Licence' in x
 SLM_LOG = lambda x: bool(
     ('O''SLM_LOG' in x) and not (re.search('#define O''SLM_LOG', x) and x.count('O''SLM_LOG') == 1)
 )
-DIGRAPH = lambda x: "<:" in x or ":>" in x or "%:" in x or "<%" in x or "%>" in x
+DIGRAPH = lambda x: "<:" in x or ":>" in x
 DOXYGEN = lambda x: '* @class' in x or '* @date' in x or '* @namespace' in x
 COPAIN = lambda x: 'copain' in x
 
