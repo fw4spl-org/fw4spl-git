@@ -4,10 +4,10 @@
  #define BUFSIZE  512
 #endif
 
-void copy(char d<::>, const char s< ::>, int len)
+void copy(char d< :: >, const char s< :: >, int len)
 {
     while (len-- >= 0)
     {
-        d<:len:> = s<%len:%>;
+        d< :len: > = s;
     }
 }

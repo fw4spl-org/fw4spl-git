@@ -174,6 +174,20 @@ class TestForbidtoken(unittest.TestCase):
         # Check result
         self.assertTrue(result, "digraphs were not detected in test file.")
 
+    def test_digraphs_with_nodigraphs_file(self):
+        # Be verbose by default
+        common.g_trace = True
+
+        # Load the test file
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        file = common.file_on_disk(dir_path + '/data/forbidtoken_nodigraphs.cpp')
+
+        # Apply the hook
+        result = forbidtoken.forbidtoken(file, 'digraphs')
+
+        # Check result
+        self.assertFalse(result, "digraphs were detected in test file.")
+
     def test_doxygen_with_lf_file(self):
         # Be verbose by default
         common.g_trace = True
