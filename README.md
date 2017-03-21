@@ -3,8 +3,17 @@ Git tools to manage contributions in fw4spl
 
 ## Sheldon
 
+### Requirements
+
+* [Python 2.7.x](https://www.python.org/downloads/)
+* [Git](https://git-scm.com/)
+* To use *codingstyle-hook*, you must install **[Uncrustify version 0.61](https://sourceforge.net/projects/uncrustify/files/uncrustify/uncrustify-0.61/)**
+* To use *cppcheck-hook*, you must install [CppCheck](http://cppcheck.sourceforge.net/)
+
+### Presentation
+
 Sheldon is a tool that allows to check that files or commits respect our [coding
-guidelines](http://fw4spl.readthedocs.io/en/11.0.4//CodingStyle/index.html).
+guidelines](http://fw4spl.readthedocs.io/en/dev/CodingStyle/index.html).
 
 ```
 usage: sheldon [-h] [-f] [-v] [--with-uncrustify UNCRUSTIFY_PATH]
@@ -41,6 +50,8 @@ The script works on git staged/modified files or directly on file/directory:
  - If the argument is a file, only this file will be checked.
  - If the argument is a directory, Sheldon will recursively check all files within this directory.
 
+### Examples
+
 **Example 1:**
 
 ```sh
@@ -75,7 +86,7 @@ sheldon -i main.cpp
 
 checks the file `main.cpp` (current local version).
 
------
+### Configuration
 
 Sheldon configuration is stored in git config files, so you can have global,
 user or repository specific settings.
