@@ -12,8 +12,9 @@ Git tools to manage contributions in fw4spl
 
 ### Presentation
 
-Sheldon is a tool that allows to check that files or commits respect our [coding
-guidelines](http://fw4spl.readthedocs.io/en/dev/CodingStyle/index.html).
+Sheldon is a tool that allows to check that files or commits respect our coding guidelines:
+ - [stable version](http://fw4spl.readthedocs.org/en/master/CodingStyle/index.html)
+ - [latest version](http://fw4spl.readthedocs.org/en/dev/CodingStyle/index.html)
 
 ```
 usage: sheldon [-h] [-f] [-v] [--with-uncrustify UNCRUSTIFY_PATH]
