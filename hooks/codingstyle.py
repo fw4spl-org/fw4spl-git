@@ -246,7 +246,7 @@ def codingstyle(files, enable_reformat, check_lgpl, deep_scan=True):
     code_patterns = source_patterns + header_patterns
     include_patterns = code_patterns + misc_patterns
 
-    sortIncludes = common.get_option('codingstyle-hook.sort-includes', default="true", type='--bool') == "true"
+    sort_includes = common.get_option('codingstyle-hook.sort-includes', default="true", type='--bool') == "true"
     global repoRoot
     repoRoot = common.get_repo_root()
 
@@ -287,7 +287,7 @@ def codingstyle(files, enable_reformat, check_lgpl, deep_scan=True):
 
     checked = set()
 
-    reformatedList = []
+    reformatted_list = []
     sortincludes.find_libraries_and_bundles(fw4spl_projects)
 
     ret = False
@@ -302,7 +302,7 @@ def codingstyle(files, enable_reformat, check_lgpl, deep_scan=True):
 
             # Do this last because contents of the file will be modified by uncrustify
             # Thus the variable content will no longer reflect the real content of the file
-            file = os.path.join(repository_root, f.path)
+            file = os.path.join(fw4spl_projects, f.path)
             res = format_file(file, enable_reformat, code_patterns, header_patterns, misc_patterns, check_lgpl,
                               sort_includes, f.status)
             count += 1
