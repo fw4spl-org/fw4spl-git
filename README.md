@@ -99,6 +99,7 @@ user or repository specific settings.
 - **codingstyle-hook.header-patterns**: list of files extensions matching header files (default: `*.hpp *.hxx *.h`)
 - **codingstyle-hook.misc-patterns**: list of files extensions matching other files (default: `*.cmake *.txt *.xml *.json`)
 - **codingstyle-hook.sort-includes**: enable or disable header includes sort (default: `true`)
+- **codingstyle-hook.additional-projects**: list of additional fw4spl repositories paths used to sort includes (separated with a ;). (default: parent folder of the current repository)
 - **cppcheck-hook.cppcheck-path**: path to the cppcheck binary (default to `cppcheck`, which means it should be in the global `PATH`)
 - **cppcheck-hook.source-patterns**: list of files extensions matching source files (default: `*.cpp *.cxx *.c`)
 - **cppcheck-hook.header-patterns**: list of files extensions matching header files (default: `*.hpp *.hxx *.h`)

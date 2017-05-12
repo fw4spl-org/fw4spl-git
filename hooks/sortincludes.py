@@ -44,16 +44,18 @@ def find_current_library(path):
     return libName
 
 
-def find_libraries_and_bundles(repo):
+def find_libraries_and_bundles(fw4spl_projects):
     global g_libs
     global g_bundles
 
     g_libs = []
     g_bundles = []
 
-    if repo is not None:
-
-        for root, dirs, files in os.walk(repo + "/.."):
+    for project_dir in fw4spl_projects:
+        if not os.path.isdir(project_dir):
+            common.warn("%s isn't a valid directory." % project_dir)
+            continue
+        for root, dirs, files in os.walk(project_dir):
             rootdir = os.path.split(root)[1]
             # Do not inspect hidden folders
             if not rootdir.startswith("."):
@@ -64,12 +66,10 @@ def find_libraries_and_bundles(repo):
                         elif re.match('.*SrcLib', root):
                             g_libs += [rootdir]
 
-        g_libs.sort()
-        g_bundles.sort()
+    g_libs.sort()
+    g_bundles.sort()
 
-    else:
 
-        common.warn("Cannot find 'fw4spl' repository structure")
 
 
 def clean_list(includeList):
