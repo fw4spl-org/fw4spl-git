@@ -224,8 +224,6 @@ def status_of_file(path):
 def file_on_disk(path):
     status = status_of_file(path)
 
-    print("STATUS=" + status)
-
     if status is not None and status != 'D':
         with open(path, 'r') as content_file:
             content = content_file.read()
