@@ -238,7 +238,7 @@ def fix_header_guard(path, enableReformat):
 
 # ------------------------------------------------------------------------------
 
-def codingstyle(files, enable_reformat, check_lgpl, deep_scan=True):
+def codingstyle(files, enable_reformat, check_lgpl):
     source_patterns = common.get_option('codingstyle-hook.source-patterns', default='*.cpp *.cxx *.c').split()
     header_patterns = common.get_option('codingstyle-hook.header-patterns', default='*.hpp *.hxx *.h').split()
     misc_patterns = common.get_option('codingstyle-hook.misc-patterns', default='*.cmake *.txt *.xml *.json').split()
@@ -302,7 +302,7 @@ def codingstyle(files, enable_reformat, check_lgpl, deep_scan=True):
 
             # Do this last because contents of the file will be modified by uncrustify
             # Thus the variable content will no longer reflect the real content of the file
-            file = os.path.join(fw4spl_projects, f.path)
+            file = os.path.join(repoRoot, f.path)
             res = format_file(file, enable_reformat, code_patterns, header_patterns, misc_patterns, check_lgpl,
                               sort_includes, f.status)
             count += 1
