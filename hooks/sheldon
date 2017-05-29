@@ -5,6 +5,7 @@ import argparse
 import os
 import textwrap
 
+import check_commit
 import check_xml
 import codingstyle
 import common
@@ -95,6 +96,7 @@ else:
         print("Invalid git path")
         exit(1)
     else:
+
         if len(args.path) > 1:
             files = [f for f in common.files_in_rev(args.path[0], args.path[1])]
         elif len(args.path) > 0:
@@ -130,54 +132,75 @@ common.note('Enabled hooks: ' + ', '.join(active_hooks))
 
 print('\n' + '*' * 120)
 
-if files:
-    reformated = False
-    if 'codingstyle' in active_hooks:
-        common.note("Beautifier phase :")
-        resultCodingstyle, reformatedList = codingstyle.codingstyle(files, enableReformat, common.is_LGPL_repo())
-        print('\n' + '*' * 120)
+results = [False]
 
-    common.note("Check phase :")
-    result = [f(files) for name, f in hooks.items() if name in active_hooks]
-    result.append(resultCodingstyle)
-    result = any(result)
+# Check commit message if activated
+if 'check_commit' in active_hooks:
+    common.note("Check commit phase :")
 
-    #  User report
+    if len(args.path) > 1:
+        commit_messages = check_commit.commit_in_path(args.path[0], args.path[1])
+    elif len(args.path) > 0:
+        commit_messages = check_commit.commit_in_path(args.path[0])
+    else:
+        # "Pre-commit" mode, get the list of staged files
+        commit_messages = check_commit.unpushed_commit_message()
+
+    if commit_messages is not None and len(commit_messages) > 0:
+        results += check_commit.check_commit_messages(commit_messages)
+
     print('\n' + '*' * 120)
 
-    if (enableReformat):
-        if result:
-            common.error("Check failed !!! Check error messages above.")
-            if reformatedList:
-                print
-                common.note("Meanwhile, some files have been reformatted :")
-                for f in reformatedList:
-                    common.note('- ' + f)
-                common.note('Please review changes.')
-            print
-            common.error("Please fix the issues, stage modifications with 'git add' and run 'sheldon' again.")
-        else:
-            if reformatedList:
-                common.note("Check succeeded, but some files have been reformatted :")
-                for f in reformatedList:
-                    common.note('- ' + f)
-                common.note('Please review and commit changes.')
-            else:
-                common.note("Check succeeded ! \o/ ")
-    else:
-        if result or reformatedList:
-            common.error("Check failed !!! ")
-            if reformatedList:
-                common.error('The following file(s) are not correctly formatted:')
-                for f in reformatedList:
-                    common.note('- ' + f)
-            common.error("Please fix the issues, stage modifications with 'git add' and run 'sheldon' again.")
+reformatted = False
 
+# check coding style
+if 'codingstyle' in active_hooks:
+    common.note("Beautifier phase :")
+    codingstyle_result, reformatted_files = codingstyle.codingstyle(files, enableReformat, common.is_LGPL_repo())
+    results.append(codingstyle_result)
+
+    print('\n' + '*' * 120)
+
+common.note("Check phase :")
+results += [f(files) for name, f in hooks.items() if name in active_hooks]
+
+# Summarize results
+result = any(results)
+
+#  User report
+print('\n' + '*' * 120)
+
+if enableReformat:
+    if result:
+        common.error("Check failed !!! Check error messages above.")
+        if reformatted_files:
+            print
+            common.note("Meanwhile, some files have been reformatted :")
+            for f in reformatted_files:
+                common.note('- ' + f)
+            common.note('Please review changes.')
+        print
+        common.error("Please fix the issues, stage modifications with 'git add' and run 'sheldon' again.")
+    else:
+        if reformatted_files:
+            common.note("Check succeeded, but some files have been reformatted :")
+            for f in reformatted_files:
+                common.note('- ' + f)
+            common.note('Please review and commit changes.')
         else:
             common.note("Check succeeded ! \o/ ")
+else:
+    if result or reformatted_files:
+        common.error("Check failed !!! ")
+        if reformatted_files:
+            common.error('The following file(s) are not correctly formatted:')
+            for f in reformatted_files:
+                common.note('- ' + f)
+        common.error("Please fix the issues, stage modifications with 'git add' and run 'sheldon' again.")
 
-    print('*' * 120)
+    else:
+        common.note("Check succeeded ! \o/ ")
 
-    exit(result)
+print('*' * 120)
 
-exit(0)
+exit(result)
