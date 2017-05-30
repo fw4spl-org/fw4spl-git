@@ -251,25 +251,28 @@ def codingstyle(files, enableReformat, checkLGPL ):
     sortIncludes = common.get_option('codingstyle-hook.sort-includes', default="true", type='--bool') == "true"
     global repoRoot
     repoRoot = common.get_repo_root()
-    
+
     if repoRoot is None:
         common.warn("Cannot find 'fw4spl' repository structure")
         parent_repo = ""
     else:
         parent_repo = os.path.abspath(os.path.join(repoRoot, os.pardir))
 
-    fw4spl_projects = common.get_option('codingstyle-hook.additional-projects', default="").split(";")
-    if not fw4spl_projects:
+    fw4spl_configured_projects = common.get_option('codingstyle-hook.additional-projects', default=None)
+    fw4spl_projects = []
+
+    if fw4spl_configured_projects is None:
         # no additional-projects specified in config file. Default is parent repository folder
         fw4spl_projects.append(parent_repo)
     else:
+        fw4spl_projects = fw4spl_configured_projects.split(";")
         # adds current repository folder to the additional-projects specified in config file.
         fw4spl_projects.append(repoRoot)
         # normalize pathname
         fw4spl_projects = map(os.path.normpath, fw4spl_projects)
         # remove duplicates
         fw4spl_projects = list(set(fw4spl_projects))
-        
+
     global UNCRUSTIFY_PATH
 
     if common.g_uncrustify_path_arg is not None and len(common.g_uncrustify_path_arg) > 0:
