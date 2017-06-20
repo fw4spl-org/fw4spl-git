@@ -54,6 +54,11 @@ parser.add_argument('-i', '--input',
                     dest='input_path',
                     help='Check the specific file/directory, staged or not. Recursive when the argument is a directory')
 
+parser.add_argument('-c', '--commit',
+                    action='store',
+                    dest='commit_check',
+                    help='Check all unpunished commit')
+
 parser.add_argument('path',
                     nargs='*',
                     help='Git path, can be a commit or two commits.')
@@ -135,21 +140,22 @@ print('\n' + '*' * 120)
 results = [False]
 
 # Check commit message if activated
-if 'check_commit' in active_hooks:
-    common.note("Check commit phase :")
+if args.commit_check or len(args.path) > 0:
+    if 'check_commit' in active_hooks:
+        common.note("Check commit phase :")
 
-    if len(args.path) > 1:
-        commit_messages = check_commit.commit_in_path(args.path[0], args.path[1])
-    elif len(args.path) > 0:
-        commit_messages = check_commit.commit_in_path(args.path[0])
-    else:
-        # "Pre-commit" mode, get the list of staged files
-        commit_messages = check_commit.unpushed_commit_message()
+        if len(args.path) > 1:
+            commit_messages = check_commit.commit_in_path(args.path[0], args.path[1])
+        elif len(args.path) > 0:
+            commit_messages = check_commit.commit_in_path(args.path[0])
+        else:
+            # "Pre-commit" mode, get the list of staged files
+            commit_messages = check_commit.unpushed_commit_message()
 
-    if commit_messages is not None and len(commit_messages) > 0:
-        results += check_commit.check_commit_messages(commit_messages)
+        if commit_messages is not None and len(commit_messages) > 0:
+            results += check_commit.check_commit_messages(commit_messages)
 
-    print('\n' + '*' * 120)
+        print('\n' + '*' * 120)
 
 reformatted = False
 
