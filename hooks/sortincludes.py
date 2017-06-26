@@ -15,33 +15,33 @@ g_bundles = []
 def find_current_library(path):
     # Just assert first for 'src' or 'include'
     match = re.search('(?:(?:include\/)|(?:src\/)).*', path)
-    if match == None:
+    if match is None:
         raise Exception('lib path not found')
 
     # Here we split so we have for instance
     # /home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/core/fwDataCamp/include/fwMedDataCamp/DicomSeries.hpp
     # split into
     # ['/home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/core/fwDataCamp/', 'include/fwMedDataCamp/DicomSeries.hpp']
-    splitByInc = string.split(path, 'include/')
+    split_by_inc = string.split(path, 'include/')
 
     # If something has been split, that means we have an include
-    if len(splitByInc) > 1:
-        libPath = splitByInc
+    if len(split_by_inc) > 1:
+        lib_path = split_by_inc
     else:
-        libPath = string.split(path, 'src/')
+        lib_path = string.split(path, 'src/')
 
     # Now we take the second last element (we start from the end because 'include' or 'src' may appear multiple times)
-    lib = libPath[-2]
+    lib = lib_path[-2]
 
-    libName = string.split(lib, '/')[-2]
-    if (libName == "tu"):
+    lib_name = string.split(lib, '/')[-2]
+    if lib_name == "tu":
         # If we have a unit test, for instance '/home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/io/fwCsvIO/test/tu/CsvReaderTest.hpp'
         # We will get 'tu' instead of the library name and thus we have to skip '/test/tu'
-        libName = string.split(lib, '/')[-4]
+        lib_name = string.split(lib, '/')[-4]
 
     # We have kept '/home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/core/fwDataCamp/'
     # We take the second last element split by '/', so in this case 'fwDataCamp'
-    return libName
+    return lib_name
 
 
 def find_libraries_and_bundles(fw4spl_projects):
@@ -72,26 +72,26 @@ def find_libraries_and_bundles(fw4spl_projects):
 
 
 
-def clean_list(includeList):
-    newIncludeList = []
+def clean_list(includes):
+    new_include_list = []
 
-    if len(includeList) == 0:
-        return newIncludeList
+    if len(includes) == 0:
+        return new_include_list
 
-    includeList.sort(key=lambda s: s[1].lower())
+    includes.sort(key=lambda s: s[1].lower())
 
-    prevModule = includeList[0][0]
-    for module, include in includeList:
-        if prevModule != module:
-            newIncludeList += ['\n']
-        newIncludeList += [include]
-        prevModule = module
+    prev_module = includes[0][0]
+    for module, include in includes:
+        if prev_module != module:
+            new_include_list += ['\n']
+        new_include_list += [include]
+        prev_module = module
 
-    newIncludeList += ['\n']
-    return newIncludeList
+    new_include_list += ['\n']
+    return new_include_list
 
 
-def sort_includes(path, enableReformat):
+def sort_includes(path, enable_reformat):
     try:
         cur_lib = find_current_library(path)
     except:
@@ -102,7 +102,7 @@ def sort_includes(path, enableReformat):
 
     file = open(pathname + "std_headers.txt", 'r')
 
-    libStd = file.read()
+    lib_std = file.read()
     file.close()
 
     file = open(path, 'rb')
@@ -110,93 +110,93 @@ def sort_includes(path, enableReformat):
     file.close()
 
     includes = set()
-    firstLine = -1
-    lastLine = -1
+    first_line = -1
+    last_line = -1
 
-    outOfInclude = False
+    out_of_include = False
 
     for i, line in enumerate(content):
-        if (re.match("#include", line)):
-            if outOfInclude:
+        if re.match("#include", line):
+            if out_of_include:
                 common.warn(
                     'Failed to parse includes in file ' + path + ', includes sort is skipped. Maybe there is a #ifdef ? This may be handled in a future version.\n')
                 return
 
-            if firstLine == -1:
-                firstLine = i
-            lastLine = i
+            if first_line == -1:
+                first_line = i
+            last_line = i
 
             includes.add(line)
-        elif firstLine > -1 and line != "\n":
-            outOfInclude = True
+        elif first_line > -1 and line != "\n":
+            out_of_include = True
 
-    if firstLine == -1 and lastLine == -1:
+    if first_line == -1 and last_line == -1:
         # No include, skip
         return
 
-    includeModules = []
+    include_modules = []
 
     # Create associated list of modules
     for include in includes:
-        includePathMatch = re.match('.*<(.*/.*)>', include)
+        include_path_match = re.match('.*<(.*/.*)>', include)
         module = ""
-        if includePathMatch:
-            module = includePathMatch.group(1).split('/')[0]
+        if include_path_match:
+            module = include_path_match.group(1).split('/')[0]
         else:
-            includePathMatch = re.match('.*"(.*/.*)"', include)
-            if includePathMatch:
-                module = includePathMatch.group(1).split('/')[0]
+            include_path_match = re.match('.*"(.*/.*)"', include)
+            if include_path_match:
+                module = include_path_match.group(1).split('/')[0]
             else:
                 module = ""
 
-        includeModules += [module]
+        include_modules += [module]
 
-    ownHeaderInclude = []
-    currentModuleIncludes = []
-    libIncludes = []
-    bundlesIncludes = []
-    otherIncludes = []
-    stdIncludes = []
+    own_header_include = []
+    current_module_includes = []
+    lib_includes = []
+    bundles_includes = []
+    other_includes = []
+    std_includes = []
 
-    origPath = re.sub(".hg-new", "", path)
-    extension = os.path.splitext(origPath)[1]
+    orig_path = re.sub(".hg-new", "", path)
+    extension = os.path.splitext(orig_path)[1]
 
     cpp = False
     if extension == ".cpp":
-        filename = os.path.basename(origPath)
-        matchedHeader = re.sub(extension, ".hpp", filename)
+        filename = os.path.basename(orig_path)
+        matched_header = re.sub(extension, ".hpp", filename)
         cpp = True
 
-    for include, module in zip(includes, includeModules):
+    for include, module in zip(includes, include_modules):
 
-        if cpp and re.search('".*' + matchedHeader + '.*"', include):
-            ownHeaderInclude += [(module, include)]
+        if cpp and re.search('".*' + matched_header + '.*"', include):
+            own_header_include += [(module, include)]
         elif module == cur_lib or re.search('".*"', include):
-            currentModuleIncludes += [(module, include)]
+            current_module_includes += [(module, include)]
         elif module in g_libs:
-            libIncludes += [(module, include)]
+            lib_includes += [(module, include)]
         elif module in g_bundles:
-            bundlesIncludes += [(module, include)]
+            bundles_includes += [(module, include)]
         else:
-            includePathMatch = re.match('.*<(.*)>', include)
-            if includePathMatch and includePathMatch.group(1) in libStd:
-                stdIncludes += [(module, include)]
+            include_path_match = re.match('.*<(.*)>', include)
+            if include_path_match and include_path_match.group(1) in lib_std:
+                std_includes += [(module, include)]
             else:
-                otherIncludes += [(module, include)]
+                other_includes += [(module, include)]
 
-    newIncludes = clean_list(ownHeaderInclude) + clean_list(currentModuleIncludes) + clean_list(
-        libIncludes) + clean_list(bundlesIncludes) + clean_list(otherIncludes) + clean_list(stdIncludes)
+    new_includes = clean_list(own_header_include) + clean_list(current_module_includes) + clean_list(
+        lib_includes) + clean_list(bundles_includes) + clean_list(other_includes) + clean_list(std_includes)
 
-    newContent = []
+    new_content = []
     for i, line in enumerate(content):
-        if i == firstLine:
-            newContent += newIncludes[:-1]
-        elif i < firstLine or i > lastLine:
-            newContent += [line]
+        if i == first_line:
+            new_content += new_includes[:-1]
+        elif i < first_line or i > last_line:
+            new_content += [line]
 
-    if content != newContent:
-        if enableReformat:
-            open(path, 'wb').writelines(newContent)
+    if content != new_content:
+        if enable_reformat:
+            open(path, 'wb').writelines(new_content)
             return FormatReturn.Modified
         else:
             common.error('Include headers are not correctly sorted in file : ' + path + '.')
