@@ -1,3 +1,6 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+
 import filecmp
 import os
 import shutil
@@ -41,7 +44,7 @@ class TestCodingstyle(unittest.TestCase):
                 files = common.directory_on_disk(test_data_path_copy)
 
                 # Apply the hook
-                result, reformatted = codingstyle.codingstyle(files, True, True)
+                result, reformatted = codingstyle.codingstyle(files, True, True, False)
 
             except:
                 shutil.rmtree(test_data_path_copy)
@@ -63,7 +66,7 @@ class TestCodingstyle(unittest.TestCase):
             files = common.directory_on_disk(test_data_path)
 
             # Apply the hook on source directly
-            result, reformatted = codingstyle.codingstyle(files, False, True)
+            result, reformatted = codingstyle.codingstyle(files, False, True, False)
 
         return result, reformatted
 

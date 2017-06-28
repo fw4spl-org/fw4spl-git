@@ -1,7 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-'''hooks to prevent adding too big binary file
+"""
+hooks to prevent adding too big binary file
 
 .gitconfig configuration :
 
@@ -15,7 +16,8 @@ example for 10MB limit :
 All files are checked by default. To check only binary files, use the type option :
 [filesize-hook]
     type = binary
-'''
+
+"""
 
 import common
 
@@ -39,7 +41,7 @@ def filesize(files):
         if check_file:
             common.trace('Checking ' + str(f.path) + ' size...')
 
-            count = count + 1
+            count += 1
             if f.size > limit:
                 too_big_files.append(f)
 

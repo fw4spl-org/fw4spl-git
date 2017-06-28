@@ -148,14 +148,19 @@ def files_in_rev(rev, rev2=''):
         mode, sha, status, path = match.group(
             'new_mode', 'new_sha1', 'status', 'path'
         )
-        yield FileAtIndex(
-            _contents(sha),
-            _size(sha),
-            mode,
-            sha,
-            status,
-            path
-        )
+
+        # Try to guest if the file has been deleted in a later commit
+        file_status = status_of_file(get_repo_root() + '/' + path)
+
+        if status is not None and status != 'D' and file_status is not None and file_status != 'D':
+            yield FileAtIndex(
+                _contents(sha),
+                _size(sha),
+                mode,
+                sha,
+                status,
+                path
+            )
 
 
 def files_staged_for_commit(rev):
@@ -183,14 +188,19 @@ def files_staged_for_commit(rev):
         mode, sha, status, path = match.group(
             'new_mode', 'new_sha1', 'status', 'path'
         )
-        yield FileAtIndex(
-            _contents(sha),
-            _size(sha),
-            mode,
-            sha,
-            status,
-            path
-        )
+
+        # Try to guest if the file has been deleted in a later commit
+        file_status = status_of_file(get_repo_root() + '/' + path)
+
+        if status is not None and status != 'D' and file_status is not None and file_status != 'D':
+            yield FileAtIndex(
+                _contents(sha),
+                _size(sha),
+                mode,
+                sha,
+                status,
+                path
+            )
 
 
 def status_of_file(path):
@@ -212,22 +222,23 @@ def status_of_file(path):
 
 
 def file_on_disk(path):
-    with open(path, 'r') as content_file:
-        content = content_file.read()
-
-    stat = os.stat(path)
-    size = stat.st_size
-
     status = status_of_file(path)
 
-    yield FileAtIndex(
-        content,
-        size,
-        '',
-        '',
-        status,
-        path
-    )
+    if status is not None and status != 'D':
+        with open(path, 'r') as content_file:
+            content = content_file.read()
+
+        stat = os.stat(path)
+        size = stat.st_size
+
+        yield FileAtIndex(
+            content,
+            size,
+            '',
+            '',
+            status,
+            path
+        )
 
 
 def directory_on_disk(path):
