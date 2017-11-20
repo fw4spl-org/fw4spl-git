@@ -302,16 +302,17 @@ def codingstyle(files, enable_reformat, check_lgpl):
 
             # Do this last because contents of the file will be modified by uncrustify
             # Thus the variable content will no longer reflect the real content of the file
-            file = os.path.join(repoRoot, f.path)
-            res = format_file(file, enable_reformat, code_patterns, header_patterns, misc_patterns, check_lgpl,
-                              sort_includes, f.status)
-            count += 1
-            if res == FormatReturn.Modified:
-                reformatted_list.append(f.path)
-                reformat_count += 1
-            elif res == FormatReturn.Error:
-                # Error in reformatting
-                ret = True
+            filepath = os.path.join(repoRoot, f.path)
+            if os.path.isfile(filepath):
+                res = format_file(filepath, enable_reformat, code_patterns, header_patterns, misc_patterns, check_lgpl,
+                                  sort_includes, f.status)
+                count += 1
+                if res == FormatReturn.Modified:
+                    reformatted_list.append(f.path)
+                    reformat_count += 1
+                elif res == FormatReturn.Error:
+                    # Error in reformatting
+                    ret = True
 
         checked.add(f)
 

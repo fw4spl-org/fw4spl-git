@@ -88,6 +88,7 @@ def execute_command(proc):
         return ExecutionResult(1, "")
     except OSError:
         return ExecutionResult(1, "")
+
     return ExecutionResult(0, out)
 
 
@@ -119,8 +120,10 @@ def _diff(rev, rev2):
 
 
 def _size(sha):
-    cmd_out = execute_command('git cat-file -s ' + sha).out
-    return int(cmd_out)
+    try:
+        return int(execute_command('git cat-file -s ' + sha).out)
+    except ValueError:
+        return 0
 
 
 def files_in_rev(rev, rev2=''):
@@ -144,23 +147,39 @@ def files_in_rev(rev, rev2=''):
         ''',
         re.X
     )
+
     for match in diff_row_regex.finditer(_diff(rev, rev2)):
         mode, sha, status, path = match.group(
             'new_mode', 'new_sha1', 'status', 'path'
         )
 
+        if status is None or status == 'D':
+            continue
+
         # Try to guest if the file has been deleted in a later commit
         file_status = status_of_file(get_repo_root() + '/' + path)
 
-        if status is not None and status != 'D' and file_status is not None and file_status != 'D':
-            yield FileAtIndex(
-                _contents(sha),
-                _size(sha),
-                mode,
-                sha,
-                status,
-                path
-            )
+        if file_status is None or file_status == 'D':
+            continue
+
+        content = _contents(sha)
+
+        if content is None or len(content) <= 0:
+            continue
+
+        size = _size(sha)
+
+        if size is None or size <= 0:
+            continue
+
+        yield FileAtIndex(
+            content,
+            size,
+            mode,
+            sha,
+            status,
+            path
+        )
 
 
 def files_staged_for_commit(rev):
