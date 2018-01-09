@@ -305,11 +305,22 @@ def fix_header_guard(path, enable_reformat):
     file_upper = path.upper()
     split_by_src = string.split(file_upper, 'SRC/')[-1]
     split_by_inc = string.split(file_upper, 'INCLUDE/')[-1]
-    if len(split_by_src) < len(split_by_inc):
-        file_upper = split_by_src
+
+    # look if this is a unit test
+    test_match = re.search('([^\/]*)(?:\/TEST\/TU\/INCLUDE)(.*)', file_upper)
+
+    if test_match:
+        expected_guard = '__' + test_match.group(1) + '_' + 'UT' + re.sub('/|\.', '_', test_match.group(2)) + '__'
     else:
-        file_upper = split_by_inc
-    expected_guard = '__' + re.sub('/|\.', '_', file_upper) + '__'
+
+        # find the last interesting part of the path (we can have SRC or INCLUDE multiple times)
+        split_by_src = string.split(file_upper, 'SRC/')[-1]
+        split_by_inc = string.split(file_upper, 'INCLUDE/')[-1]
+        if len(split_by_src) < len(split_by_inc):
+            file_upper = split_by_src
+        else:
+            file_upper = split_by_inc
+        expected_guard = '__' + re.sub('/|\.', '_', file_upper) + '__'
 
     # Remove all about expected guard
     while len(re.findall("#(ifndef|define|endif)((" + useless_char + ")|(/\*))*" + expected_guard + "[^\n]*", content, re.DOTALL)) != 0:
