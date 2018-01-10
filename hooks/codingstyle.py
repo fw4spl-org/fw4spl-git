@@ -49,194 +49,7 @@ LICENSE = '/\* \*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*\n\
  \* published by the Free Software Foundation.\n\
  \* \*\*\*\*\*\* END LICENSE BLOCK \*\*\*\*\*\* \*/'
 
-
-# ------------------------------------------------------------------------------
-
-def fix_license_year(file, enable_reformat, status):
-    str_old_file = open(file, 'rb').read()
-
-    common.trace('Checking for LGPL license in: ' + file)
-
-    # Look for the license pattern
-    match = re.search(LICENSE, str_old_file, re.MULTILINE)
-    if match is None:
-        common.error('LGPL license header missing in : ' + file + '.')
-        return FormatReturn.Error
-
-    LICENSE_YEAR = r"(.*)FW4SPL - Copyright \(C\) IRCAD, ([0-9]+)."
-    LICENSE_YEAR_RANGE = r"(.*)FW4SPL - Copyright \(C\) IRCAD, ([0-9]+)-([0-9]+)."
-
-    if re.search(LICENSE_YEAR_RANGE, str_old_file):
-        LICENSE_YEAR_REPLACE = r"\1FW4SPL - Copyright (C) IRCAD, \2-" + str(YEAR) + "."
-        str_new_file = re.sub(LICENSE_YEAR_RANGE, LICENSE_YEAR_REPLACE, str_old_file)
-    else:
-        match = re.search(LICENSE_YEAR, str_old_file)
-        if match:
-            if status == 'A' or match.group(2) == str(YEAR):
-                LICENSE_YEAR_REPLACE = r"\1FW4SPL - Copyright (C) IRCAD, " + str(YEAR) + "."
-                str_new_file = re.sub(LICENSE_YEAR, LICENSE_YEAR_REPLACE, str_old_file)
-            else:
-                LICENSE_YEAR_REPLACE = r"\1FW4SPL - Copyright (C) IRCAD, \2-" + str(YEAR) + "."
-                str_new_file = re.sub(LICENSE_YEAR, LICENSE_YEAR_REPLACE, str_old_file)
-        else:
-            common.error('Licence year format in : ' + file + ' is not correct.')
-            return FormatReturn.Error
-
-    if str_new_file != str_old_file:
-        if enable_reformat:
-            common.note('Licence year fixed in : ' + file)
-            open(file, 'wb').write(str_new_file)
-            return FormatReturn.Modified
-        else:
-            common.error('Licence year in : ' + file + ' is not up-to-date.')
-            return FormatReturn.Error
-
-    return FormatReturn.NotModified
-
-
-# ------------------------------------------------------------------------------
-
-# Reformat file according to minimal coding-style rules
-# Return True if anything as been modified along with a unified diff
-def format_file(file, enable_reformat, code_patterns, header_patterns, misc_patterns, check_lgpl, sort_includes,
-                status):
-    # Invoke uncrustify for source code files
-    if any(fnmatch(file, p) for p in code_patterns):
-
-        common.trace('Launching uncrustify on : ' + file)
-        configFileName = os.path.join(os.path.dirname(__file__), 'uncrustify.cfg')
-
-        ret = FormatReturn()
-
-        command = UNCRUSTIFY_PATH + ' -c ' + configFileName + ' -q %s ' + file
-
-        if enable_reformat is True:
-            # Check first
-            uncrustify = common.execute_command(command % '--check')
-
-            if uncrustify.status:
-                uncrustify = common.execute_command(command % '--replace --no-backup')
-                if uncrustify.status:
-                    common.error('Uncrustify failure on file: ' + file)
-                    return FormatReturn.Error
-                ret.add(FormatReturn.Modified)
-        else:
-            uncrustify = common.execute_command(command % '--check')
-
-            if uncrustify.status:
-                common.error('Uncrustify failure on file: ' + file)
-                return FormatReturn.Error
-
-        # Fix license year
-        if check_lgpl is True:
-            ret.add(fix_license_year(file, enable_reformat, status))
-
-        # Sort headers
-        if sort_includes is True:
-            ret.add(sortincludes.sort_includes(file, enable_reformat))
-
-        if any(fnmatch(file, p) for p in header_patterns):
-            ret.add(fix_header_guard(file, enable_reformat))
-
-        return ret.value
-
-    # Replace only YEAR, TAB, CRLF and CR for miscellaneous files
-    elif any(fnmatch(file, p) for p in misc_patterns):
-
-        common.trace('Parsing: ' + file + ' to replace CR, CRLF and TABs')
-
-        str_old_file = open(file, 'rb').read()
-
-        str_new_file = re.sub('\t', '    ', str_old_file)
-        tmp_str = re.sub('\r\n', '\n', str_new_file)
-        str_new_file = re.sub('\r', '\n', tmp_str)
-
-        if str_old_file == str_new_file:
-            return FormatReturn.NotModified
-
-        # Something has been changed, write the new file
-        open(file, 'wb').write(str_new_file)
-        return FormatReturn.Modified
-
-
-# ------------------------------------------------------------------------------
-
-# Check the header guard consistency
-def fix_header_guard(path, enableReformat):
-    ret = FormatReturn()
-
-    file = open(path, 'r')
-    content = file.read()
-    file.close()
-
-    # Assume the first ifndef is the first header guard
-    match = re.search('#ifndef +(_*(?:[0-9A-Z]+_*)*)$', content, re.MULTILINE)
-    if match is None:
-        common.error("Can't find header guard, maybe check the naming convention ?")
-        common.error(FILEWARN(path))
-        return FormatReturn.Error
-
-    guard = match.group(1)
-
-    # Now check that the guard name follows the file name
-    file_upper = path.upper()
-
-    match = re.search('(?:(?:INCLUDE\/)|(?:SRC\/)).*', file_upper)
-    if match is None:
-        common.error("warning: can't find 'src' or 'include' in the file path.")
-        common.error("         Header guard naming check skipped.")
-        common.error(FILEWARN(path))
-
-    else:
-
-        # look if this is a unit test
-        test_match = re.search('([^\/]*)(?:\/TEST\/TU\/INCLUDE)(.*)', file_upper)
-
-        if test_match:
-            expected_guard = '__' + test_match.group(1) + '_' + 'UT' + re.sub('/|\.', '_', test_match.group(2)) + '__'
-        else:
-
-            # find the last interesting part of the path (we can have SRC or INCLUDE multiple times)
-            split_by_src = string.split(file_upper, 'SRC/')[-1]
-            split_by_inc = string.split(file_upper, 'INCLUDE/')[-1]
-            if len(split_by_src) < len(split_by_inc):
-                file_upper = split_by_src
-            else:
-                file_upper = split_by_inc
-            expected_guard = '__' + re.sub('/|\.', '_', file_upper) + '__'
-
-        if guard != expected_guard:
-            common.note(FILEWARN(path))
-
-            str_new_file = re.sub(r"([^_])" + guard, r"\1" + expected_guard, content)
-
-            if str_new_file != content:
-                if enableReformat:
-                    open(path, 'wb').write(str_new_file)
-                    content = str_new_file
-                    common.note("The header guard does not follow our naming convention.")
-                    common.note("    Replacing " + guard + " by " + expected_guard + " .")
-                    ret.add(FormatReturn.Modified)
-                else:
-                    common.error("The header guard does not follow our naming convention.")
-                    return FormatReturn.Error
-
-        match = re.search('#define +' + expected_guard, content, re.MULTILINE)
-        if match is None:
-            common.error("Can't find #define header guard matching : " + expected_guard)
-            common.error(FILEWARN(path))
-            return FormatReturn.Error
-
-        match = re.search('#endif */[/\*] *' + expected_guard + '(?:.*\*/)?', content, re.MULTILINE)
-        if match is None:
-            common.error("Can't find #endif with a comment matching the header guard  : " + expected_guard + "\n")
-            common.error(FILEWARN(path))
-            return FormatReturn.Error
-
-    return ret.value
-
-
-# ------------------------------------------------------------------------------
+ # ------------------------------------------------------------------------------
 
 def codingstyle(files, enable_reformat, check_lgpl):
     source_patterns = common.get_option('codingstyle-hook.source-patterns', default='*.cpp *.cxx *.c').split()
@@ -276,8 +89,8 @@ def codingstyle(files, enable_reformat, check_lgpl):
     if common.g_uncrustify_path_arg is not None and len(common.g_uncrustify_path_arg) > 0:
         UNCRUSTIFY_PATH = common.g_uncrustify_path_arg
     else:
-        UNCRUSTIFY_PATH = common.get_option('codingstyle-hook.uncrustify-path', default=UNCRUSTIFY_PATH,
-                                            type='--path').strip()
+        UNCRUSTIFY_PATH = common.get_option('codingstyle-hook.uncrustify-path', default=UNCRUSTIFY_PATH, type='--path').strip()
+
 
     common.note('Using uncrustify: ' + UNCRUSTIFY_PATH)
 
@@ -302,19 +115,306 @@ def codingstyle(files, enable_reformat, check_lgpl):
 
             # Do this last because contents of the file will be modified by uncrustify
             # Thus the variable content will no longer reflect the real content of the file
-            file = os.path.join(repoRoot, f.path)
-            res = format_file(file, enable_reformat, code_patterns, header_patterns, misc_patterns, check_lgpl,
-                              sort_includes, f.status)
-            count += 1
-            if res == FormatReturn.Modified:
-                reformatted_list.append(f.path)
-                reformat_count += 1
-            elif res == FormatReturn.Error:
-                # Error in reformatting
-                ret = True
+            file_path = os.path.join(repoRoot, f.path)
+            if os.path.isfile(file_path):
+                res = format_file(file_path, enable_reformat, code_patterns, header_patterns, misc_patterns, check_lgpl,
+                                  sort_includes, f.status)
+                count += 1
+                if res == FormatReturn.Modified:
+                    reformatted_list.append(f.path)
+                    reformat_count += 1
+                elif res == FormatReturn.Error:
+                    # Error in reformatting
+                    ret = True
 
         checked.add(f)
 
     common.note('%d file(s) checked, %d file(s) reformatted.' % (count, reformat_count))
 
     return ret, reformatted_list
+
+# ------------------------------------------------------------------------------
+
+# Reformat file according to minimal coding-style rules
+# Return True if anything as been modified along with a unified diff
+def format_file(source_file, enable_reformat, code_patterns, header_patterns, misc_patterns, check_lgpl, sort_includes, status):
+    # Invoke uncrustify for source code files
+    if any(fnmatch(source_file, p) for p in code_patterns):
+
+        common.trace('Launching uncrustify on : ' + source_file)
+        config_file = os.path.join(os.path.dirname(__file__), 'uncrustify.cfg')
+
+        ret = FormatReturn()
+
+        # Fix license year
+        if check_lgpl is True:
+            ret.add(fix_license_year(source_file, enable_reformat, status))
+
+        # Sort headers
+        if sort_includes is True:
+            ret.add(sortincludes.sort_includes(source_file, enable_reformat))
+
+        if any(fnmatch(source_file, p) for p in header_patterns):
+            ret.add(fix_header_guard(source_file, enable_reformat))
+
+        # Uncrustify
+        command = UNCRUSTIFY_PATH + ' -c ' + config_file + ' -q %s ' + source_file
+
+        if enable_reformat is True:
+            # Check first
+            uncrustify = common.execute_command(command % '--check')
+
+            if uncrustify.status:
+                uncrustify = common.execute_command(command % '--replace --no-backup')
+                if uncrustify.status:
+                    common.error('Uncrustify failure on file: ' + source_file)
+                    return FormatReturn.Error
+                ret.add(FormatReturn.Modified)
+        else:
+            uncrustify = common.execute_command(command % '--check')
+
+            if uncrustify.status:
+                common.error('Uncrustify failure on file: ' + source_file)
+                return FormatReturn.Error
+
+
+        return ret.value
+
+    # Replace only YEAR, TAB, CRLF and CR for miscellaneous files
+    elif any(fnmatch(source_file, p) for p in misc_patterns):
+
+        common.trace('Parsing: ' + source_file + ' to replace CR, CRLF and TABs')
+
+        str_old_file = open(source_file, 'rb').read()
+
+        str_new_file = re.sub('\t', '    ', str_old_file)
+        tmp_str = re.sub('\r\n', '\n', str_new_file)
+        str_new_file = re.sub('\r', '\n', tmp_str)
+
+        if str_old_file == str_new_file:
+            return FormatReturn.NotModified
+
+        # Something has been changed, write the new file
+        open(source_file, 'wb').write(str_new_file)
+        return FormatReturn.Modified
+
+# ------------------------------------------------------------------------------
+
+# Check licence header
+def fix_license_year(path, enable_reformat, status):
+
+    with open(path, 'r') as source_file:
+        content = source_file.read()
+
+    common.trace('Checking for LGPL license in: ' + path)
+
+    # Look for the license pattern
+    licence_number = len(re.findall(LICENSE, content, re.MULTILINE))
+    if licence_number > 1:
+
+        common.error("There should be just one licence header per file in :" + FILEWARN(path) + ".")
+        return FormatReturn.Error
+
+    elif licence_number < 1:
+
+        if enable_reformat:
+
+            lic = LICENSE
+            lic = lic.replace("(.*)", "%s-%s" % (YEAR, YEAR))
+            lic = lic.replace("\\", "")
+
+            with open(path, 'wb') as source_file:
+
+                source_file.write(lic + "\n\n")
+                source_file.write(content)
+
+            common.note('LGPL license header fixed in : ' + FILEWARN(path) + '.')
+            return FormatReturn.Modified
+
+        else:
+
+            common.error("There should be at least one licence header per file in :" + FILEWARN(path) + ".")
+            return FormatReturn.Error
+
+    # Here, it has only one occurrences that must be checked
+
+    # Check license
+    LICENSE_YEAR = r"(.*)FW4SPL - Copyright \(C\) IRCAD, ([0-9]+)."
+    LICENSE_YEAR_RANGE = r"(.*)FW4SPL - Copyright \(C\) IRCAD, ([0-9]+)-([0-9]+)."
+
+    # Check date
+    if re.search(LICENSE_YEAR_RANGE, content):
+
+        LICENSE_YEAR_REPLACE = r"\1FW4SPL - Copyright (C) IRCAD, \2-" + str(YEAR) + "."
+        str_new_file = re.sub(LICENSE_YEAR_RANGE, LICENSE_YEAR_REPLACE, content)
+
+    else:
+
+        match = re.search(LICENSE_YEAR, content)
+
+        if match:
+
+            if status == 'A' or match.group(2) == str(YEAR):
+
+                LICENSE_YEAR_REPLACE = r"\1FW4SPL - Copyright (C) IRCAD, " + str(YEAR) + "."
+                str_new_file = re.sub(LICENSE_YEAR, LICENSE_YEAR_REPLACE, content)
+
+            else:
+
+                LICENSE_YEAR_REPLACE = r"\1FW4SPL - Copyright (C) IRCAD, \2-" + str(YEAR) + "."
+                str_new_file = re.sub(LICENSE_YEAR, LICENSE_YEAR_REPLACE, content)
+        else:
+
+            common.error('Licence year format in : ' + FILEWARN(path) + ' is not correct.')
+            return FormatReturn.Error
+
+    if str_new_file != content:
+
+        if enable_reformat:
+
+            common.note('Licence year fixed in : ' + FILEWARN(path))
+            with open(path, 'wb') as source_file:
+                source_file.write(str_new_file)
+            return FormatReturn.Modified
+
+        else:
+
+            common.error('Licence year in : ' + FILEWARN(path) + ' is not up-to-date.')
+            return FormatReturn.Error
+
+    return FormatReturn.NotModified
+
+# ------------------------------------------------------------------------------
+
+# Check the header guard consistency
+def fix_header_guard(path, enable_reformat):
+
+    ret = FormatReturn()
+
+    with open(path, 'r') as source_file:
+        content = source_file.read()
+
+    # Regex for '#pragma once'
+    single_comment = "(\/\/[^(\n|\r)]*)"
+    multi_comment = "(\/\*([^\*\/]|\*[^\/]|\/)*\*\/)"
+    useless_char = "\t| |\r"
+    pragma_once = "#pragma(" + useless_char + ")+once"
+    all_before_pragma = ".*" + pragma_once + "(" + useless_char + ")*\n"
+
+    # Remove old style
+    file_upper = path.upper()
+    split_by_src = string.split(file_upper, 'SRC/')[-1]
+    split_by_inc = string.split(file_upper, 'INCLUDE/')[-1]
+    if len(split_by_src) < len(split_by_inc):
+        file_upper = split_by_src
+    else:
+        file_upper = split_by_inc
+    expected_guard = '__' + re.sub('/|\.', '_', file_upper) + '__'
+
+    # Remove all about expected guard
+    while len(re.findall("#(ifndef|define|endif)((" + useless_char + ")|(/\*))*" + expected_guard + "[^\n]*", content, re.DOTALL)) != 0:
+
+        match2 = re.search("#(ifndef|define|endif)((" + useless_char + ")|(/\*))*" + expected_guard + "[^\n]*", content, re.DOTALL)
+        if enable_reformat:
+
+            content = content.replace(match2.group(0), "")
+            common.note("Old style of header guard fixed : " + match2.group(0) + "in file : " + FILEWARN(path) +".")
+            with open(path, 'wb') as source_file:
+                source_file.write(content)
+            ret.add(FormatReturn.Modified)
+
+        else:
+
+            common.error("Old style of header guard found : " + match2.group(0) + "in file : " + FILEWARN(path) +".")
+            ret.add(FormatReturn.Error)
+            return ret.value
+
+
+    # Number of occurrences of '#pragma once' 
+    pragma_number = len(re.findall(pragma_once, content, re.MULTILINE))
+    if pragma_number > 1:
+
+        common.error("There should be just one '#pragma once' per file in :" + FILEWARN(path) + ".")
+        ret.add(FormatReturn.Error)
+        return ret.value
+
+    elif pragma_number < 1:
+            
+        # Add 'pragma once'
+        if enable_reformat:
+
+            match = re.search("(" + single_comment + "|" + multi_comment + "|" + useless_char + "|\n)*", content,
+                              re.MULTILINE)
+
+            with open(path, 'wb') as source_file:
+                source_file.write(match.group(0))
+                source_file.write("#pragma once\n\n")
+                source_file.write(content.replace(match.group(0), ""))
+
+            common.note("'#pragma once' fixed in :" + FILEWARN(path))
+
+            ret.add(FormatReturn.Modified)
+            return ret.value
+
+        else:
+
+            common.error("There should be at least one '#pragma once' per file in :" + FILEWARN(path) + ".")
+            ret.add(FormatReturn.Error)
+            return ret.value
+
+    # Here, it has only one occurrences that must be checked
+
+    # Get all string before first '#pragma once'
+    out = re.search(all_before_pragma, content, re.DOTALL).group(0)
+
+    # Remove '#pragma once'
+    match2 = re.search(pragma_once, out, re.DOTALL)
+    out = out.replace(match2.group(0), "")
+
+    # Remove multi line comments
+    while len(re.findall(multi_comment, out, re.DOTALL)) != 0:
+
+        match2 = re.search(multi_comment, out, re.DOTALL)
+        out = out.replace(match2.group(0), "")
+
+    # Remove single line comments
+    while len(re.findall(single_comment, out, re.DOTALL)) != 0:
+
+        match2 = re.search(single_comment, out, re.DOTALL)
+        out = out.replace(match2.group(0), "")
+
+    # If it's not empty, they are an error
+    if len(re.findall("[^\n]", out, re.DOTALL)) != 0:
+
+        common.error(("Unexpected : '%s' befor #pragma once in :" % re.search("^.+$", out, re.MULTILINE).group(0)) + FILEWARN(path) + ".")
+        ret.add(FormatReturn.Error)
+        return ret.value
+
+    # Check space number between '#pragma' and 'once'
+    if len(re.findall("#pragma once", content, re.DOTALL)) == 0:
+
+        if enable_reformat:
+            # Get all string before first '#pragma once'
+            out = re.search(all_before_pragma, content, re.DOTALL).group(0)
+
+            # Remove '#pragma once'
+            match2 = re.search(pragma_once, out, re.DOTALL)
+            out2 = out.replace(match2.group(0), "")
+
+            with open(path, 'wb') as source_file:
+
+                    source_file.write(out2)
+                    source_file.write("#pragma once\n")
+                    source_file.write(content.replace(out, ""))
+
+            ret.add(FormatReturn.Modified)
+            return ret.value
+
+        else:
+
+            common.error("Needed : '#pragma once', actual : '" + re.search(pragma_once, content, re.DOTALL).group(0) + "' in file :" + FILEWARN(path) + ".")
+            ret.add(FormatReturn.Error)
+            return ret.value
+
+    ret.add(FormatReturn.NotModified)
+    return ret.value
