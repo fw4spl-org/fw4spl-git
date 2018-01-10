@@ -302,19 +302,27 @@ def fix_header_guard(path, enable_reformat):
     all_before_pragma = ".*" + pragma_once + "(" + useless_char + ")*\n"
 
     # Remove old style
-    file_upper = path.upper()
-    split_by_src = string.split(file_upper, 'SRC/')[-1]
-    split_by_inc = string.split(file_upper, 'INCLUDE/')[-1]
-    if len(split_by_src) < len(split_by_inc):
-        file_upper = split_by_src
-    else:
-        file_upper = split_by_inc
-    expected_guard = '__' + re.sub('/|\.', '_', file_upper) + '__'
+    path_upper = path.upper()
+    path_upper = path_upper.replace("\\","/")
+    substrings = path_upper.split('/');
+    find = False;
+    res = "__";
+    for i in range(0,len(substrings)) :
+        if substrings[i] == "INCLUDE" :
+            find = True;
+        elif substrings[i] == "TEST" :
+            res += substrings[i-1].upper() + "_UT_";
+        elif find :
+            res += substrings[i].upper() + "_";
+    expected_guard = res.split('.');
+    expected_guard[0] += "_HPP__";
+
+    expected_guard = expected_guard[0]
 
     # Remove all about expected guard
-    while len(re.findall("#(ifndef|define|endif)((" + useless_char + ")|(/\*))*" + expected_guard + "[^\n]*", content, re.DOTALL)) != 0:
+    while len(re.findall("#(ifndef|define|endif)((" + useless_char + ")|(/\*)|(\/\/))*" + expected_guard + "[^\n]*", content, re.DOTALL)) != 0:
 
-        match2 = re.search("#(ifndef|define|endif)((" + useless_char + ")|(/\*))*" + expected_guard + "[^\n]*", content, re.DOTALL)
+        match2 = re.search("#(ifndef|define|endif)((" + useless_char + ")|(/\*)|(\/\/))*" + expected_guard + "[^\n]*", content, re.DOTALL)
         if enable_reformat:
 
             content = content.replace(match2.group(0), "")
