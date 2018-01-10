@@ -303,7 +303,8 @@ def fix_header_guard(path, enable_reformat):
 
     # Remove old style
     path_upper = path.upper()
-    substrings = path_upper.split('\\');
+    path_upper = path_upper.replace("\\","/")
+    substrings = path_upper.split('/');
     find = False;
     res = "__";
     for i in range(0,len(substrings)) :
