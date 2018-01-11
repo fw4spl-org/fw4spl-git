@@ -68,7 +68,13 @@ ExecutionResult = collections.namedtuple(
 
 
 def get_repo_root():
-    return execute_command('git rev-parse --show-toplevel').out.strip()
+    result = execute_command('git rev-parse --show-toplevel');
+
+    if result.status == 0:
+        return result.out.strip()
+
+    warn(result.out)
+    return ""
 
 
 def is_LGPL_repo():
@@ -84,16 +90,16 @@ def is_LGPL_repo():
 def execute_command(proc):
     try:
         out = subprocess.check_output(proc.split(), stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError:
-        return ExecutionResult(1, "")
-    except OSError:
-        return ExecutionResult(1, "")
+    except subprocess.CalledProcessError as e:
+        return ExecutionResult(1, e.output)
+    except OSError as e:
+        return ExecutionResult(1, e.strerror)
 
     return ExecutionResult(0, out)
 
 
 def current_commit():
-    if execute_command('git rev-parse --verify HEAD').status:
+    if execute_command('git rev-parse --verify HEAD').status != 0:
         return '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
     else:
         return 'HEAD'
@@ -108,22 +114,45 @@ def get_option(option, default, type=""):
 
 
 def _contents(sha):
-    return execute_command('git show ' + sha).out
+    result = execute_command('git show ' + sha)
+
+    if result.status == 0:
+        return result.out
+
+    warn(result.out)
+    return ""
 
 
 def _diff_index(rev):
-    return execute_command('git diff-index --cached -z --diff-filter=AM ' + rev).out
+    result = execute_command('git diff-index --cached -z --diff-filter=AM ' + rev)
+
+    if result.status == 0:
+        return result.out
+
+    warn(result.out)
+    return ""
 
 
 def _diff(rev, rev2):
-    return execute_command('git diff --raw -z --diff-filter=AM ' + rev + ' ' + rev2).out
+    result = execute_command('git diff --raw -z --diff-filter=AM ' + rev + ' ' + rev2)
+
+    if result.status == 0:
+        return result.out
+
+    warn(result.out)
+    return ""
 
 
 def _size(sha):
-    try:
-        return int(execute_command('git cat-file -s ' + sha).out)
-    except ValueError:
-        return 0
+    result = execute_command('git cat-file -s ' + sha)
+    if result.status == 0:
+        try:
+            return int(result.out)
+        except ValueError:
+            return 0
+
+    warn(result.out)
+    return 0
 
 
 def files_in_rev(rev, rev2=''):
@@ -228,7 +257,7 @@ def status_of_file(path):
     status = 'A'
     gitstatus = execute_command('git status --porcelain ' + path)
 
-    if gitstatus.status == 1:
+    if gitstatus.status != 0:
         warn("File : " + path + " is not in a git repository, sheldon will consider it like a new file")
     else:
         out = gitstatus.out.split()

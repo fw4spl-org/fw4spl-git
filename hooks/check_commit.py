@@ -25,7 +25,7 @@ CONST = _Const()
 def unpushed_commit_message():
     command_result = common.execute_command('git log --branches --not --remotes --pretty=format:%h:%aE:%s')
 
-    if command_result.status == 1:
+    if command_result.status != 0:
         return []
     else:
         return command_result.out.split('\n')
@@ -42,7 +42,7 @@ def commit_in_path(old_path=None, new_path=None):
 
     command_result = common.execute_command(git_command)
 
-    if command_result.status == 1:
+    if command_result.status != 0:
         return []
     else:
         return command_result.out.split('\n')
