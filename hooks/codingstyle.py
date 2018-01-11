@@ -167,7 +167,7 @@ def format_file(source_file, enable_reformat, code_patterns, header_patterns, mi
             uncrustify = common.execute_command(command % '--check')
 
             if uncrustify.status != 0:
-                uncrustify = common.execute_command(command % '--replace --no-backup --if-changed --mtime')
+                uncrustify = common.execute_command(command % '--replace --no-backup --if-changed')
                 if uncrustify.status != 0:
                     common.error('Uncrustify failure on file: ' + source_file)
                     common.error(uncrustify.out)
