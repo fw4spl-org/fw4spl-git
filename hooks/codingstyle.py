@@ -295,7 +295,7 @@ def fix_header_guard(path, enable_reformat):
         content = source_file.read()
 
     # Regex for '#pragma once'
-    single_comment = "(\/\/[^(\n|\r)]*)"
+    single_comment = "(\/\/([^(\n|\r)]|\(|\))*)"
     multi_comment = "(\/\*([^\*\/]|\*[^\/]|\/)*\*\/)"
     useless_char = "\t| |\r"
     pragma_once = "#pragma(" + useless_char + ")+once"

@@ -74,7 +74,7 @@ common.g_uncrustify_path_arg = args.uncrustify_path
 
 if args.input_path is not None and len(args.input_path) > 0:
     # Double check path argument
-    if args.path is not None or len(args.path) > 0:
+    if args.path is not None and len(args.path) > 0:
         common.warn('--input is used, path argument will be ignored.')
 
     # Cleanup the path
