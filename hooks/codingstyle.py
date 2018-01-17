@@ -27,7 +27,6 @@ additional-projects : additional fw4spl repositories paths used to sort includes
 
 """
 
-import datetime
 import os
 import re
 from fnmatch import fnmatch
@@ -36,7 +35,6 @@ import common
 import sortincludes
 from common import FormatReturn
 
-YEAR = datetime.date.today().year
 SEPARATOR = '%s\n' % ('-' * 79)
 FILEWARN = lambda x: ('  - %s') % os.path.relpath(x, common.get_repo_root())
 UNCRUSTIFY_PATH = 'uncrustify'
@@ -60,6 +58,7 @@ def codingstyle(files, enable_reformat, check_lgpl):
     include_patterns = code_patterns + misc_patterns
 
     sort_includes = common.get_option('codingstyle-hook.sort-includes', default="true", type='--bool') == "true"
+
     global repoRoot
     repoRoot = common.get_repo_root()
 
@@ -209,6 +208,8 @@ def fix_license_year(path, enable_reformat, status):
         content = source_file.read()
 
     common.trace('Checking for LGPL license in: ' + path)
+
+    YEAR = common.get_file_datetime(path).year
 
     # Look for the license pattern
     licence_number = len(re.findall(LICENSE, content, re.MULTILINE))

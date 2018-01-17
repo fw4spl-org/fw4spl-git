@@ -2,12 +2,13 @@
 # -*- coding: UTF-8 -*-
 
 import collections
+# From command line arguments
+import datetime
 import fnmatch
 import os
 import re
 import subprocess
 
-# From command line arguments
 g_trace = False
 g_cppcheck_path_arg = None
 g_uncrustify_path_arg = None
@@ -78,13 +79,53 @@ def get_repo_root():
 
 
 def is_LGPL_repo():
-    repoRoot = get_repo_root()
+    repo_root = get_repo_root()
     try:
-        f = open(os.path.join(repoRoot, "LICENSE/COPYING.LESSER"))
+        f = open(os.path.join(repo_root, "LICENSE/COPYING.LESSER"))
         f.close()
         return True
     except:
         return False
+
+
+def _get_git_commit_datetime(path):
+    # Get the git modification date of the file
+    result = execute_command('git log -1 --format=%ad --date=format:%Y-%m-%dT%H:%M:%S ' + path)
+
+    if result.status != 0:
+        warn(result.out)
+        return None
+
+    try:
+        # Parse the string back to a datetime object
+        return datetime.datetime.strptime(result.out.strip(), '%Y-%m-%dT%H:%M:%S')
+    except Exception as e:
+        warn(e.message)
+        return None
+
+
+def get_file_datetime(path):
+    try:
+        creation_time = datetime.datetime.fromtimestamp(os.path.getctime(path))
+        modification_time = datetime.datetime.fromtimestamp(os.path.getmtime(path))
+    except Exception as e:
+        warn(e.message)
+
+        creation_time = None
+        modification_time = None
+
+    git_datetime = _get_git_commit_datetime(path)
+
+    # Use git modification time if it is valid and creation_time == modification_time
+    if git_datetime is not None and (modification_time is None or creation_time == modification_time):
+        return git_datetime
+
+    # Use the modification time, if any
+    if modification_time is not None:
+        return modification_time
+
+    # Otherwise use the system time
+    return datetime.datetime.today()
 
 
 def execute_command(proc):
@@ -93,7 +134,7 @@ def execute_command(proc):
     except subprocess.CalledProcessError as e:
         return ExecutionResult(1, e.output)
     except OSError as e:
-        return ExecutionResult(1, e.strerror)
+        return ExecutionResult(1, e.message)
 
     return ExecutionResult(0, out)
 
