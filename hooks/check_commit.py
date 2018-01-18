@@ -64,13 +64,6 @@ def __check_commit_title(commit_hash, commit_title):
             + "' with title '"
             + commit_title
             + "' does not follow Sheldon rules: '<" + "|".join(CONST.TYPES) + ">(<scope>): <subject>'.")
-    # else:
-    #     common.note(
-    #         "Commit '"
-    #         + commit_hash
-    #         + "' with title '"
-    #         + commit_title
-    #         + "' follows Sheldon rules.")
 
     return title_have_not_matched
 
@@ -108,5 +101,7 @@ def check_commit_messages(commit_messages):
 
             results.append(__check_commit_title(commit_hash, commit_title))
             results.append(__check_commit_author(commit_hash, commit_author))
+
+    common.note('%d commit(s) checked, %d error(s) found.' % (len(commit_messages), results.count(True)))
 
     return results
