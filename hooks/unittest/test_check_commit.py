@@ -16,6 +16,12 @@ class TestCheckCommit(unittest.TestCase):
         result = check_commit.check_commit_messages(
             ["ffffffff:devil@ircad.fr:fix(reactor): Prevent uncontrolled nuclear fusion. See #666"])
 
+        result += check_commit.check_commit_messages(
+            ["ffffffff:devil@ircad.fr:chore(*): apply latest sheldon"])
+
+        result += check_commit.check_commit_messages(
+            ["ffffffff:devil@ircad.fr:refactor(plugin_config.cmake): generate at build instead at configure"])
+
         # Check result
         self.assertFalse(any(result), "A valid commit has been detected as invalid.")
 
