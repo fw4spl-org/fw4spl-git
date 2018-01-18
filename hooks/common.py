@@ -104,7 +104,7 @@ def _get_git_commit_datetime(path):
         return None
 
 
-def get_file_datetime(path):
+def get_file_datetime(path, check_commits_date):
     try:
         creation_time = datetime.datetime.fromtimestamp(os.path.getctime(path))
         modification_time = datetime.datetime.fromtimestamp(os.path.getmtime(path))
@@ -114,11 +114,12 @@ def get_file_datetime(path):
         creation_time = None
         modification_time = None
 
-    git_datetime = _get_git_commit_datetime(path)
+    if check_commits_date:
+        git_datetime = _get_git_commit_datetime(path)
 
-    # Use git modification time if it is valid and creation_time == modification_time
-    if git_datetime is not None and (modification_time is None or creation_time == modification_time):
-        return git_datetime
+        # Use git modification time if it is valid and creation_time == modification_time
+        if git_datetime is not None:
+            return git_datetime
 
     # Use the modification time, if any
     if modification_time is not None:

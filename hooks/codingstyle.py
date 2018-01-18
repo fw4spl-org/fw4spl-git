@@ -49,7 +49,7 @@ LICENSE = '/\* \*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*\n\
 
 # ------------------------------------------------------------------------------
 
-def codingstyle(files, enable_reformat, check_lgpl):
+def codingstyle(files, enable_reformat, check_lgpl, check_commits_date):
     source_patterns = common.get_option('codingstyle-hook.source-patterns', default='*.cpp *.cxx *.c').split()
     header_patterns = common.get_option('codingstyle-hook.header-patterns', default='*.hpp *.hxx *.h').split()
     misc_patterns = common.get_option('codingstyle-hook.misc-patterns', default='*.cmake *.txt *.xml *.json').split()
@@ -117,7 +117,7 @@ def codingstyle(files, enable_reformat, check_lgpl):
             file_path = os.path.join(repoRoot, f.path)
             if os.path.isfile(file_path):
                 res = format_file(file_path, enable_reformat, code_patterns, header_patterns, misc_patterns, check_lgpl,
-                                  sort_includes, f.status)
+                                  sort_includes, f.status, check_commits_date)
                 count += 1
                 if res == FormatReturn.Modified:
                     reformatted_list.append(f.path)
@@ -138,7 +138,7 @@ def codingstyle(files, enable_reformat, check_lgpl):
 # Reformat file according to minimal coding-style rules
 # Return True if anything as been modified along with a unified diff
 def format_file(source_file, enable_reformat, code_patterns, header_patterns, misc_patterns, check_lgpl, sort_includes,
-                status):
+                status, check_commits_date):
     # Invoke uncrustify for source code files
     if any(fnmatch(source_file, p) for p in code_patterns):
 
@@ -149,7 +149,7 @@ def format_file(source_file, enable_reformat, code_patterns, header_patterns, mi
 
         # Fix license year
         if check_lgpl is True:
-            ret.add(fix_license_year(source_file, enable_reformat, status))
+            ret.add(fix_license_year(source_file, enable_reformat, status, check_commits_date))
 
         # Sort headers
         if sort_includes is True:
@@ -203,13 +203,13 @@ def format_file(source_file, enable_reformat, code_patterns, header_patterns, mi
 # ------------------------------------------------------------------------------
 
 # Check licence header
-def fix_license_year(path, enable_reformat, status):
+def fix_license_year(path, enable_reformat, status, check_commits_date):
     with open(path, 'r') as source_file:
         content = source_file.read()
 
     common.trace('Checking for LGPL license in: ' + path)
 
-    YEAR = common.get_file_datetime(path).year
+    YEAR = common.get_file_datetime(path, check_commits_date).year
 
     # Look for the license pattern
     licence_number = len(re.findall(LICENSE, content, re.MULTILINE))
