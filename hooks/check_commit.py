@@ -51,7 +51,7 @@ def commit_in_path(old_path=None, new_path=None):
 # check the title conformance against commitizen/angularjs/... rules
 def __check_commit_title(commit_hash, commit_title):
     # Test the title against regex
-    title_pattern = re.compile(r'(?P<type>' + '|'.join(CONST.TYPES) + ')\((?P<scope>\w+)\):(?P<subject>.*)')
+    title_pattern = re.compile(r'(?P<type>' + '|'.join(CONST.TYPES) + ')\((?P<scope>\S+)\):(?P<subject>.*)')
     title_match = title_pattern.match(commit_title)
 
     # Convert into a boolean
@@ -63,14 +63,14 @@ def __check_commit_title(commit_hash, commit_title):
             + commit_hash
             + "' with title '"
             + commit_title
-            + "' does not follow Sheldon rules: '<type>(<scope>): <subject>'.")
-    else:
-        common.note(
-            "Commit '"
-            + commit_hash
-            + "' with title '"
-            + commit_title
-            + "' follows Sheldon rules.")
+            + "' does not follow Sheldon rules: '<" + "|".join(CONST.TYPES) + ">(<scope>): <subject>'.")
+    # else:
+    #     common.note(
+    #         "Commit '"
+    #         + commit_hash
+    #         + "' with title '"
+    #         + commit_title
+    #         + "' follows Sheldon rules.")
 
     return title_have_not_matched
 
