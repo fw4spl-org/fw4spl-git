@@ -72,10 +72,15 @@ common.g_trace = args.verbose
 common.g_cppcheck_path_arg = args.cppcheck_path
 common.g_uncrustify_path_arg = args.uncrustify_path
 
+# Whether we will check file dates from commits date or from the local time
+check_commits_date = True
+
 if args.input_path is not None and len(args.input_path) > 0:
     # Double check path argument
     if args.path is not None and len(args.path) > 0:
         common.warn('--input is used, path argument will be ignored.')
+
+    check_commits_date = False
 
     # Cleanup the path
     file_path = os.path.realpath(args.input_path)
@@ -109,6 +114,7 @@ else:
         else:
             # "Pre-commit" mode, get the list of staged files
             files = [f for f in common.files_staged_for_commit(common.current_commit())]
+            check_commits_date = False
 
 hooks = {}
 hooks.update(forbidtoken.hooks)
@@ -162,7 +168,8 @@ reformatted = False
 # check coding style
 if 'codingstyle' in active_hooks:
     common.note("Beautifier phase :")
-    codingstyle_result, reformatted_files = codingstyle.codingstyle(files, enableReformat, common.is_LGPL_repo())
+    codingstyle_result, reformatted_files = codingstyle.codingstyle(files, enableReformat, common.is_LGPL_repo(),
+                                                                    check_commits_date)
     results.append(codingstyle_result)
 
     print('\n' + '*' * 120)
