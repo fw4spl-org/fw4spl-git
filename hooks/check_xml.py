@@ -28,6 +28,53 @@ def xml_parser(content):
         raise
     return tree
 
+"""
+check if the objects are used by a service
+"""
+def check_unused_object(tree):
+    err = ""
+
+    # find all objects
+    objects = tree.findall("./extension/config/object")
+
+    # find all inputs, inouts, outputs
+    inouts = tree.findall("./extension/config/service/inout")
+    inouts += tree.findall("./extension/config/service/inout/key") # for inout group
+    inouts += tree.findall("./extension/config/service/in")
+    inouts += tree.findall("./extension/config/service/in/key") # for in group
+    inouts += tree.findall("./extension/config/service/out")
+    inouts += tree.findall("./extension/config/service/out/key") # for out group
+
+    for obj in objects:
+        uid=obj.get("uid")
+        objfound=False
+
+        for inout in inouts:
+            inout_uid=inout.get("uid")
+            if inout_uid == uid:
+                objfound=True
+                break
+
+        if not objfound:
+            err += "- object '" + uid + "' is not used.\n"
+
+    return err
+
+"""
+check if the service with autoConnect="yes" has inputs
+"""
+def check_autoConnect(tree):
+    err=""
+    services = tree.findall("./extension/config/service")
+    for srv in services:
+        uid = srv.get("uid")
+        connect = srv.get("autoConnect")
+        if connect:
+
+            inouts = srv.findall("inout") + srv.findall("in")
+            if not inouts:
+                err += "- service '" + uid + "' has no input, it must not be auto-connected.\n"
+    return err
 
 def check_xml(files):
     abort = False
@@ -37,11 +84,16 @@ def check_xml(files):
             content = f.contents
             common.trace('Checking ' + str(f.path) + ' syntax...')
             try:
-                xml_parser(content)
+                tree = xml_parser(content)
             except ET.ParseError as err:
 
-                common.error('XML parsing error in ' + f.path + ' :\n ' + err.msg + '\n.')
+                common.error('XML parsing error in ' + f.path + ' :\n' + err.msg + '\n')
                 abort = True
+
+            msg = check_unused_object(tree)
+            msg += check_autoConnect(tree)
+            if msg:
+                common.error('XML parsing error in ' + f.path + ' :\n' + msg)
 
     return abort
 
