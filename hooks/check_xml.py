@@ -29,21 +29,25 @@ def xml_parser(content):
     return tree
 
 """
-check if the objects are used by a service
+check if the objects are used by a service in a configuration. The tree root must contain <config>
 """
-def check_unused_object(tree):
+def check_unused_object_config(tree):
     err = ""
 
+    if not tree.tag == "config":
+        err = "Cannot parse the configuration with the root " + tree.tag + "\n"
+        return err
+
     # find all objects
-    objects = tree.findall("./extension/config/object")
+    objects = tree.findall("./object")
 
     # find all inputs, inouts, outputs
-    inouts = tree.findall("./extension/config/service/inout")
-    inouts += tree.findall("./extension/config/service/inout/key") # for inout group
-    inouts += tree.findall("./extension/config/service/in")
-    inouts += tree.findall("./extension/config/service/in/key") # for in group
-    inouts += tree.findall("./extension/config/service/out")
-    inouts += tree.findall("./extension/config/service/out/key") # for out group
+    inouts =  tree.findall("./service/inout")
+    inouts += tree.findall("./service/inout/key") # for inout group
+    inouts += tree.findall("./service/in")
+    inouts += tree.findall("./service/in/key") # for in group
+    inouts += tree.findall("./service/out")
+    inouts += tree.findall("./service/out/key") # for out group
 
     for obj in objects:
         uid=obj.get("uid")
@@ -61,14 +65,31 @@ def check_unused_object(tree):
     return err
 
 """
+check if the objects are used by a service, it parses the <plugin> and <extension> tag
+"""
+def check_unused_object(tree):
+    err = ""
+
+    # The tree's root could be <plugin> or <extension>
+    configs = tree.findall("./config")
+    configs += tree.findall("./extension/config")
+
+    for config in configs:
+        err += check_unused_object_config(config)
+
+    return err
+
+"""
 check if the service with autoConnect="yes" has inputs
 """
 def check_autoConnect(tree):
     err=""
-    services = tree.findall("./extension/config/service")
+    services = tree.findall("./extension/config/service") # root is <plugin>
+    services = tree.findall("./config/service") # root is <extension>
     for srv in services:
         uid = srv.get("uid")
         connect = srv.get("autoConnect")
+
         if connect:
 
             inouts = srv.findall("inout") + srv.findall("in")
@@ -92,6 +113,7 @@ def check_xml(files):
 
             msg = check_unused_object(tree)
             msg += check_autoConnect(tree)
+
             if msg:
                 common.error('XML parsing error in ' + f.path + ' :\n' + msg)
 
