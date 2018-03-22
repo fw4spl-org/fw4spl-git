@@ -29,25 +29,46 @@ def xml_parser(content):
     return tree
 
 """
-check if the objects are used by a service in a configuration. The tree root must contain <config>
+Runs the check on the <config> tree.
+- check if the objects are used by a service
+- check if the services with autoConnect="yes" has inputs
+- check if each service is used in the configuration
 """
-def check_unused_object_config(tree):
+def check_configurations(tree):
     err = ""
 
-    if not tree.tag == "config":
-        err = "Cannot parse the configuration with the root " + tree.tag + "\n"
+    # The tree's root could be <plugin> or <extension>
+    configs = tree.findall("./config")
+    configs += tree.findall("./extension/config")
+
+    for config in configs:
+        err += check_unused_object(config)
+        err += check_autoConnect(config)
+        err += check_unused_service(config)
+
+    return err
+
+"""
+Check if the objects are used by a service in a configuration.
+The tree root must be <config>
+"""
+def check_unused_object(config_tree):
+    err = ""
+
+    if not config_tree.tag == "config":
+        err = "Cannot parse the configuration with the root " + config_tree.tag + "\n"
         return err
 
     # find all objects
-    objects = tree.findall("./object")
+    objects = config_tree.findall("./object")
 
     # find all inputs, inouts, outputs
-    inouts =  tree.findall("./service/inout")
-    inouts += tree.findall("./service/inout/key") # for inout group
-    inouts += tree.findall("./service/in")
-    inouts += tree.findall("./service/in/key") # for in group
-    inouts += tree.findall("./service/out")
-    inouts += tree.findall("./service/out/key") # for out group
+    inouts =  config_tree.findall("./service/inout")
+    inouts += config_tree.findall("./service/inout/key") # for inout group
+    inouts += config_tree.findall("./service/in")
+    inouts += config_tree.findall("./service/in/key") # for in group
+    inouts += config_tree.findall("./service/out")
+    inouts += config_tree.findall("./service/out/key") # for out group
 
     for obj in objects:
         uid=obj.get("uid")
@@ -64,28 +85,16 @@ def check_unused_object_config(tree):
 
     return err
 
-"""
-check if the objects are used by a service, it parses the <plugin> and <extension> tag
-"""
-def check_unused_object(tree):
-    err = ""
 
-    # The tree's root could be <plugin> or <extension>
-    configs = tree.findall("./config")
-    configs += tree.findall("./extension/config")
-
-    for config in configs:
-        err += check_unused_object_config(config)
-
-    return err
 
 """
-check if the service with autoConnect="yes" has inputs
+Check if the services with autoConnect="yes" has inputs/
+The tree root must be <config>
 """
-def check_autoConnect(tree):
+def check_autoConnect(config_tree):
     err=""
-    services = tree.findall("./extension/config/service") # root is <plugin>
-    services = tree.findall("./config/service") # root is <extension>
+    services = config_tree.findall("./service")
+
     for srv in services:
         uid = srv.get("uid")
         connect = srv.get("autoConnect")
@@ -96,6 +105,55 @@ def check_autoConnect(tree):
             if not inouts:
                 err += "- service '" + uid + "' has no input, it must not be auto-connected.\n"
     return err
+
+"""
+Check if each service is used in the configuration
+The tree root must be <config>
+"""
+def check_unused_service(config_tree):
+    err = ""
+
+    services = config_tree.findall("./service")
+    starts = config_tree.findall("./start")
+    starts += config_tree.findall("./service/start") # for SStarter
+    starts += config_tree.findall("./service/start_or_stop") # for SStarter
+    starts += config_tree.findall("./service/start_only") # for SStarter
+    starts += config_tree.findall("./service/stop") # for SStarter
+    views = config_tree.findall("./service/registry/view")
+    views += config_tree.findall("./service/registry/menuItem")
+    views += config_tree.findall("./service/registry/editor")
+    views += config_tree.findall("./service/registry/menu")
+    views += config_tree.findall("./service/registry/toolBar")
+    views += config_tree.findall("./service/registry/menuBar")
+    slots = config_tree.findall("./service/slots/slot") # SSlotCaller
+
+    uids = []
+
+    for start in starts:
+        uids += [start.get("uid")]
+
+    for view in views:
+        uids += [view.get("sid")]
+
+    for slot in slots:
+        uids += [slot.text]
+
+    for srv in services:
+
+        srv_found = False
+
+        srv_uid = srv.get("uid")
+
+        for uid in uids:
+            if srv_uid == uid:
+                srv_found = True
+                break
+
+        if not srv_found:
+            err += "- service '" + srv_uid + "' is not used.\n"
+
+    return err
+
 
 def check_xml(files):
     abort = False
@@ -111,11 +169,11 @@ def check_xml(files):
                 common.error('XML parsing error in ' + f.path + ' :\n' + err.msg + '\n')
                 abort = True
 
-            msg = check_unused_object(tree)
-            msg += check_autoConnect(tree)
+            msg = check_configurations(tree)
 
             if msg:
                 common.error('XML parsing error in ' + f.path + ' :\n' + msg)
+                abort = True
 
     return abort
 
