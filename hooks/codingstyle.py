@@ -223,7 +223,7 @@ def fix_license_year(path, enable_reformat, status, check_commits_date):
         if enable_reformat:
 
             lic = LICENSE
-            lic = lic.replace("(.*)", "%s-%s" % (YEAR, YEAR))
+            lic = lic.replace("(.*)", "%s" % YEAR)
             lic = lic.replace("\\", "")
 
             with open(path, 'wb') as source_file:
