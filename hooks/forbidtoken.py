@@ -26,6 +26,14 @@ from functools import partial
 
 import common
 
+BAD_WORDS_LIST = [
+    'copain',
+    'zizi',
+    'bite',
+    'couille',
+    'fuck',
+]
+
 CRLF = lambda x: '\r\n' in x
 CR = lambda x: '\r' in x
 TAB = lambda x: '\t' in x
@@ -36,7 +44,7 @@ SLM_LOG = lambda x: bool(
 )
 DIGRAPH = lambda x: "<:" in x or ":>" in x
 DOXYGEN = lambda x: '* @class' in x or '* @date' in x or '* @namespace' in x
-COPAIN = lambda x: 'copain' in x
+BADWORDS = lambda x: any(bad in x for bad in BAD_WORDS_LIST)
 
 tr = {
     'crlf': (CRLF, 'CRLF line endings', '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py'),
@@ -47,7 +55,7 @@ tr = {
     'oslmlog': (SLM_LOG, 'O''SLM_LOG', '*.cpp *.hpp *.hxx *.cxx *.c *.h'),
     'digraphs': (DIGRAPH, 'Forbiden digraphs: <'':, :''>', '*.cpp *.hpp *.hxx *.cxx *.c *.h'),
     'doxygen': (DOXYGEN, '@class @date @namespace doxygen tag(s)', '*.cpp *.hpp *.hxx *.cxx *.c *.h'),
-    'copain': (COPAIN, 'copain', '*.cpp *.hpp *.hxx *.cxx *.c *.h'),
+    'badwords': (BADWORDS, 'Forbidden word in our code', '*.cpp *.hpp *.hxx *.cxx *.c *.h'),
 }
 
 WARNING = ('Attempt to commit or push text file(s) containing "%s"')
