@@ -32,6 +32,9 @@ BAD_WORDS_LIST = [
     'bite',
     'couille',
     'fuck',
+    'toto',
+    'tutu',
+    'titi',
 ]
 
 CRLF = lambda x: '\r\n' in x
