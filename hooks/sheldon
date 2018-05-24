@@ -13,7 +13,7 @@ import cppcheck
 import filesize
 import forbidtoken
 
-DEFAULT_HOOKS = 'crlf tab filesize oslmlog digraphs codingstyle doxygen copain check_xml check_commit'
+DEFAULT_HOOKS = 'crlf tab filesize oslmlog digraphs codingstyle doxygen badwords check_xml check_commit'
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
