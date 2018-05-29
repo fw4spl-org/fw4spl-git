@@ -1,5 +1,5 @@
 
-import os,sys
+import os, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../hooks'))
 
@@ -14,8 +14,8 @@ def gitlog(rev, rev2, options=''):
     if result.status == 0:
         return result.out
 
-    warn(result.out)
-    return ""
+    raise Exception('Error executing "git log"' )
+
 
 def gen_log(rev, rev2):
     difflog = gitlog(rev, rev2, '--pretty=format:%P')
@@ -35,11 +35,15 @@ def gen_log(rev, rev2):
         commit_scope = ""
         commit_subject = ""
 
+        regex_indent = re.compile('^    ')
+        regex_see_mr = re.compile('^See merge request.*')
         for line in commit.splitlines():
 
             if found_commit:
-                commit_description += line + '\n'
-
+                description_line = re.sub(regex_indent, '', line)
+                description_line = re.sub(regex_see_mr, '', description_line)
+                if len(description_line):
+                    commit_description += description_line + '\n'
             else:
                 title_pattern = re.compile(check_commit.TITLE_PATTERN_REGEX)
                 title_match = title_pattern.search(line)
@@ -49,6 +53,8 @@ def gen_log(rev, rev2):
                     commit_scope = title_match.group('scope')
                     commit_subject = title_match.group('subject').strip(' ')
 
+                    # Force upper case on the first letter
+                    commit_subject = commit_subject[0].upper() + commit_subject[1:]
                     if commit_type == 'merge':
                         commit_type = 'feat'
                     found_commit = True
@@ -72,8 +78,9 @@ def gen_log(rev, rev2):
             formatted_changelog += 'Bug fixes:\n==========\n\n'
 
         for entry in entries:
-            formatted_changelog += entry[0] + '\n------------\n'
-            formatted_changelog += entry[1] + '\n'
+            formatted_changelog += entry[0] + '\n' + '-' * len(entry[0]) + '\n'
+            if not re.match(r' ?Into', entry[1]):
+                formatted_changelog += entry[1] + '\n'
             formatted_changelog += entry[2] + '\n'
 
     print formatted_changelog
