@@ -76,9 +76,12 @@ def gen_log(rev, rev2):
 
         if commit_type in ['feat']:
             formatted_changelog += 'New features:\n=============\n\n'
-
-        if commit_type in ['fix']:
+        elif commit_type in ['fix']:
             formatted_changelog += 'Bug fixes:\n==========\n\n'
+        elif commit_type in ['docs']:
+            formatted_changelog += 'Documentation:\n==============\n\n'
+        else:
+            continue
 
         for entry in entries:
             formatted_changelog += entry[0] + '\n' + '-' * len(entry[0]) + '\n'
