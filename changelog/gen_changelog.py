@@ -80,6 +80,10 @@ def gen_log(rev, rev2):
             formatted_changelog += 'Bug fixes:\n==========\n\n'
         elif commit_type in ['docs']:
             formatted_changelog += 'Documentation:\n==============\n\n'
+        elif commit_type in ['refactor']:
+            formatted_changelog += 'Refactor:\n=========\n\n'
+        elif commit_type in ['perf']:
+            formatted_changelog += 'Performances:\n=============\n\n'
         else:
             continue
 
