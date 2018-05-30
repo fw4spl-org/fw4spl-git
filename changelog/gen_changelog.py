@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../hooks'))
 import common
 import re
 import check_commit
+import argparse
 
 
 def gitlog(rev, rev2, options=''):
@@ -85,4 +86,23 @@ def gen_log(rev, rev2):
 
     print formatted_changelog
 
-gen_log('15.0.0', '16.0.0')
+
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description='Generate a changelog for a FW4SPL repository.',
+)
+
+parser.add_argument('path',
+                    nargs='*',
+                    help='Git path, can be a commit or two commits.')
+
+args = parser.parse_args()
+
+try:
+    rev1 = args.path[0]
+    rev2 = args.path[1]
+except:
+    parser.print_usage()
+    exit(1)
+
+gen_log(rev1, rev2)
