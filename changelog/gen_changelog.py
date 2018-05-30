@@ -38,11 +38,13 @@ def gen_log(rev, rev2):
 
         regex_indent = re.compile('^    ')
         regex_see_mr = re.compile('^See merge request.*')
+        regex_close_bug = re.compile('^[Cc]loses?.*#.*')
         for line in commit.splitlines():
 
             if found_commit:
                 description_line = re.sub(regex_indent, '', line)
                 description_line = re.sub(regex_see_mr, '', description_line)
+                description_line = re.sub(regex_close_bug, '', description_line)
                 if len(description_line):
                     commit_description += description_line + '\n'
             else:
