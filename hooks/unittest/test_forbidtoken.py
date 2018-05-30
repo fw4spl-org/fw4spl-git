@@ -219,7 +219,7 @@ class TestForbidtoken(unittest.TestCase):
         # Check result
         self.assertTrue(result, "doxygen were not detected in test file.")
 
-    def test_copain_with_lf_file(self):
+    def test_badwords_with_lf_file(self):
         # Be verbose by default
         common.g_trace = True
 
@@ -228,12 +228,12 @@ class TestForbidtoken(unittest.TestCase):
         file = common.file_on_disk(dir_path + '/data/forbidtoken_lf.cpp')
 
         # Apply the hook
-        result = forbidtoken.forbidtoken(file, 'copain')
+        result = forbidtoken.forbidtoken(file, 'badwords')
 
         # Check result
         self.assertFalse(result, "copain were detected in test file.")
 
-    def test_copain_with_copain_file(self):
+    def test_badwords_with_copain_file(self):
         # Be verbose by default
         common.g_trace = True
 
@@ -242,7 +242,7 @@ class TestForbidtoken(unittest.TestCase):
         file = common.file_on_disk(dir_path + '/data/forbidtoken_copain.cpp')
 
         # Apply the hook
-        result = forbidtoken.forbidtoken(file, 'copain')
+        result = forbidtoken.forbidtoken(file, 'badwords')
 
         # Check result
         self.assertTrue(result, "copain were not detected in test file.")

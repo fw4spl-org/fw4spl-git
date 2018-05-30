@@ -7,7 +7,7 @@ Git tools to manage contributions in fw4spl
 
 * [Python 2.7.x](https://www.python.org/downloads/)
 * [Git](https://git-scm.com/)
-* To use *codingstyle-hook*, you must install **[Uncrustify version 0.61](https://sourceforge.net/projects/uncrustify/files/uncrustify/uncrustify-0.61/)**
+* To use *codingstyle-hook*, you must install our patched version of **[Uncrustify](https://github.com/fw4spl-org/uncrustify/releases)**
 * To use *cppcheck-hook*, you must install [CppCheck](http://cppcheck.sourceforge.net/)
 
 ### Presentation
@@ -116,7 +116,7 @@ the oslm_log hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
 the digraphs hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
 - **forbidtoken-hooks.doxygen**: list of file extensions that should be checked for
 the doyxgen hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
-- **forbidtoken-hooks.copain**: list of file extensions that should be checked for
+- **forbidtoken-hooks.badwords**: list of file extensions that should be checked for
 the copain hook (default: `*.cpp *.hpp *.hxx *.cxx *.c *.h`)
 - **filesize-hook.max-size**: set the maximum size of files (default 1048576)
 - **filesize-hook.type**: `binary` or `all` (default `all`)

@@ -126,6 +126,8 @@ def check_unused_service(config_tree):
     views += config_tree.findall("./service/registry/toolBar")
     views += config_tree.findall("./service/registry/menuBar")
     slots = config_tree.findall("./service/slots/slot") # SSlotCaller
+    slots += config_tree.findall("./connect/signal")
+    slots += config_tree.findall("./connect/slot")
 
     uids = []
 
@@ -136,7 +138,9 @@ def check_unused_service(config_tree):
         uids += [view.get("sid")]
 
     for slot in slots:
-        uids += [slot.text]
+        match = common.re.match(r"(\w+)", slot.text)
+        if(match):
+            uids += [match.group(0)]
 
     for srv in services:
 
