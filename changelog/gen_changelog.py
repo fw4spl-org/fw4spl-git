@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
 import os, sys
 
@@ -8,14 +10,18 @@ import re
 import check_commit
 import argparse
 
+# FIXME: For now, we duplicate the regex of check_commit.py because some commits are not always properly formatted
+# The only difference for now is the subject starting with a capital (which is forbidden normally)
+TITLE_PATTERN_REGEX = r'(?P<type>' + '|'.join(check_commit.CONST.TYPES) + ')\((?P<scope>\S+)\):(?P<subject> [A-z].*)'
 
 def gitlog(rev, rev2, options=''):
-    result = common.execute_command('git log --first-parent ' + options + ' ' + rev + '..' + rev2)
+    command = 'git log --first-parent ' + options + ' ' + rev + '..' + rev2
+    result = common.execute_command(command)
 
     if result.status == 0:
         return result.out
 
-    raise Exception('Error executing "git log"' )
+    raise Exception('Error executing "%s"', command )
 
 
 def gen_log(rev, rev2):
@@ -39,6 +45,7 @@ def gen_log(rev, rev2):
         regex_indent = re.compile('^    ')
         regex_see_mr = re.compile('^See merge request.*')
         regex_close_bug = re.compile('^[Cc]loses?.*#.*')
+
         for line in commit.splitlines():
 
             if found_commit:
@@ -48,7 +55,7 @@ def gen_log(rev, rev2):
                 if len(description_line):
                     commit_description += description_line + '\n'
             else:
-                title_pattern = re.compile(check_commit.TITLE_PATTERN_REGEX)
+                title_pattern = re.compile(TITLE_PATTERN_REGEX)
                 title_match = title_pattern.search(line)
 
                 if title_match:
