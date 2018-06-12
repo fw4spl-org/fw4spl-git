@@ -114,6 +114,7 @@ def check_unused_service(config_tree):
     err = ""
 
     services = config_tree.findall("./service")
+    parameters = config_tree.findall("./service/parameter")
     starts = config_tree.findall("./start")
     starts += config_tree.findall("./service/start") # for SStarter
     starts += config_tree.findall("./service/start_or_stop") # for SStarter
@@ -136,6 +137,9 @@ def check_unused_service(config_tree):
 
     for view in views:
         uids += [view.get("sid")]
+
+    for param in parameters:
+        uids += [param.get("uid")]    
 
     for slot in slots:
         match = common.re.match(r"(\w+)", slot.text)
