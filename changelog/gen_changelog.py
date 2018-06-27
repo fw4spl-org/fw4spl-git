@@ -44,7 +44,9 @@ def gen_log(rev, rev2):
 
         regex_indent = re.compile('^    ')
         regex_see_mr = re.compile('^See merge request.*')
+        regex_merge_branch = re.compile('^Merge branch.*')
         regex_close_bug = re.compile('^[Cc]loses?.*#.*')
+        regex_howto = re.compile('^## How to test.*')
 
         for line in commit.splitlines():
 
@@ -52,6 +54,10 @@ def gen_log(rev, rev2):
                 description_line = re.sub(regex_indent, '', line)
                 description_line = re.sub(regex_see_mr, '', description_line)
                 description_line = re.sub(regex_close_bug, '', description_line)
+                description_line = re.sub(regex_merge_branch, '', description_line)
+                if re.match(regex_howto, description_line):
+                    # Simply stops there if someone forgot the usual gitlab description part
+                    break
                 if len(description_line):
                     commit_description += description_line + '\n'
             else:
@@ -59,8 +65,10 @@ def gen_log(rev, rev2):
                 title_match = title_pattern.search(line)
 
                 if title_match:
-                    commit_type = title_match.group('type')
                     commit_scope = title_match.group('scope')
+                    if commit_scope == 'master':
+                        continue
+                    commit_type = title_match.group('type')
                     commit_subject = title_match.group('subject').strip(' ')
 
                     # Force upper case on the first letter
@@ -77,7 +85,7 @@ def gen_log(rev, rev2):
             changelog[commit_type].append([commit_scope, commit_subject, commit_description])
 
     formatted_changelog = 'Changelog between FW4SPL ' + rev + ' and ' + rev2 + '\n'
-    formatted_changelog += '******************************************\n\n'
+    formatted_changelog += '*' * (len(formatted_changelog)-1) + '\n\n'
 
     for commit_type, entries in changelog.iteritems():
 
