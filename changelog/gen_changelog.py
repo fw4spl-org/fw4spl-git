@@ -48,18 +48,31 @@ def gen_log(rev, rev2):
         regex_close_bug = re.compile('^[Cc]loses?.*#.*')
         regex_howto = re.compile('^## How to test.*')
 
+        was_previous_line_empty = False
         for line in commit.splitlines():
 
             if found_commit:
+
+                # Strip some text...
                 description_line = re.sub(regex_indent, '', line)
+                empty_line =  len(description_line) == 0
                 description_line = re.sub(regex_see_mr, '', description_line)
                 description_line = re.sub(regex_close_bug, '', description_line)
                 description_line = re.sub(regex_merge_branch, '', description_line)
+
                 if re.match(regex_howto, description_line):
                     # Simply stops there if someone forgot the usual gitlab description part
                     break
                 if len(description_line):
                     commit_description += description_line + '\n'
+                    was_previous_line_empty = False
+                elif empty_line:
+                    if not was_previous_line_empty:
+                        commit_description += '\n'
+                        was_previous_line_empty = True
+                else:
+                    was_previous_line_empty = True
+
             else:
                 title_pattern = re.compile(TITLE_PATTERN_REGEX)
                 title_match = title_pattern.search(line)
@@ -77,6 +90,10 @@ def gen_log(rev, rev2):
                         commit_type = 'feat'
                     found_commit = True
 
+        # Add a line end if we have no description
+        if len(commit_description) <= 2:
+            commit_subject += '\n'
+
         if found_commit:
 
             if not changelog.has_key(commit_type):
@@ -84,7 +101,12 @@ def gen_log(rev, rev2):
 
             changelog[commit_type].append([commit_scope, commit_subject, commit_description])
 
-    formatted_changelog = 'Changelog between FW4SPL ' + rev + ' and ' + rev2 + '\n'
+    try:
+        repo_name = open(".fw4spl", 'r').read()
+    except:
+        repo_name = open(".fw4spl-deps", 'r').read()
+
+    formatted_changelog = 'Changelog between ' + repo_name + ' ' + rev + ' and ' + rev2 + '\n'
     formatted_changelog += '*' * (len(formatted_changelog)-1) + '\n\n'
 
     for commit_type, entries in changelog.iteritems():
@@ -105,8 +127,8 @@ def gen_log(rev, rev2):
         for entry in entries:
             formatted_changelog += entry[0] + '\n' + '-' * len(entry[0]) + '\n'
             if not re.match(r' ?Into', entry[1]):
-                formatted_changelog += entry[1] + '\n'
-            formatted_changelog += entry[2] + '\n'
+                formatted_changelog += entry[1]
+            formatted_changelog += entry[2]
 
     print formatted_changelog
 
