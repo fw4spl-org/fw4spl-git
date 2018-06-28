@@ -47,6 +47,7 @@ def gen_log(rev, rev2):
         regex_merge_branch = re.compile('^Merge branch.*')
         regex_close_bug = re.compile('^[Cc]loses?.*#.*')
         regex_howto = re.compile('^## How to test.*')
+        regex_fix_symbols = re.compile('(::[A-z:]*) ')
 
         was_previous_line_empty = False
         for line in commit.splitlines():
@@ -59,6 +60,7 @@ def gen_log(rev, rev2):
                 description_line = re.sub(regex_see_mr, '', description_line)
                 description_line = re.sub(regex_close_bug, '', description_line)
                 description_line = re.sub(regex_merge_branch, '', description_line)
+                description_line = re.sub(regex_fix_symbols, r'`\1`', description_line)
 
                 if re.match(regex_howto, description_line):
                     # Simply stops there if someone forgot the usual gitlab description part
@@ -81,18 +83,24 @@ def gen_log(rev, rev2):
                     commit_scope = title_match.group('scope')
                     if commit_scope == 'master':
                         continue
+
                     commit_type = title_match.group('type')
                     commit_subject = title_match.group('subject').strip(' ')
+                    # Ensure the scope has a proper line ending
+                    commit_subject = commit_subject.strip('\n')
+
+                    if commit_subject[-1] != '.':
+                        commit_subject += '.'
 
                     # Force upper case on the first letter
                     commit_subject = commit_subject[0].upper() + commit_subject[1:]
+
+                    commit_subject = '*' + commit_subject + '*'
+                    commit_subject += '\n'
+
                     if commit_type == 'merge':
                         commit_type = 'feat'
                     found_commit = True
-
-        # Add a line end if we have no description
-        if len(commit_description) <= 2:
-            commit_subject += '\n'
 
         if found_commit:
 
@@ -105,27 +113,27 @@ def gen_log(rev, rev2):
         repo_name = open(".fw4spl", 'r').read()
     except:
         repo_name = open(".fw4spl-deps", 'r').read()
+    repo_name = repo_name.strip('\n')
 
-    formatted_changelog = 'Changelog between ' + repo_name + ' ' + rev + ' and ' + rev2 + '\n'
-    formatted_changelog += '*' * (len(formatted_changelog)-1) + '\n\n'
+    formatted_changelog = '# ' + repo_name + ' ' + rev2 + '\n\n'
 
     for commit_type, entries in changelog.iteritems():
 
         if commit_type in ['feat']:
-            formatted_changelog += 'New features:\n=============\n\n'
+            formatted_changelog += '## New features:\n\n'
         elif commit_type in ['fix']:
-            formatted_changelog += 'Bug fixes:\n==========\n\n'
+            formatted_changelog += '## Bug fixes:\n\n'
         elif commit_type in ['docs']:
-            formatted_changelog += 'Documentation:\n==============\n\n'
+            formatted_changelog += '## Documentation:\n\n'
         elif commit_type in ['refactor']:
-            formatted_changelog += 'Refactor:\n=========\n\n'
+            formatted_changelog += '## Refactor:\n\n'
         elif commit_type in ['perf']:
-            formatted_changelog += 'Performances:\n=============\n\n'
+            formatted_changelog += '## Performances:\n\n'
         else:
             continue
 
         for entry in entries:
-            formatted_changelog += entry[0] + '\n' + '-' * len(entry[0]) + '\n'
+            formatted_changelog += "### " + entry[0] + '\n\n'
             if not re.match(r' ?Into', entry[1]):
                 formatted_changelog += entry[1]
             formatted_changelog += entry[2]
