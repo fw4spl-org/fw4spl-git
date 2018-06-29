@@ -7,7 +7,6 @@ import common
 
 
 class _Const(object):
-    @apply
     def TYPES():
         def fset(self, value):
             raise TypeError

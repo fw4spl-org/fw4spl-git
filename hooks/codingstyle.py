@@ -13,7 +13,7 @@ Make sure you respect the minimal coding rules and gently reformat files for you
     source-patterns = *.cpp *.cxx *.c
     header-patterns = *.hpp *.hxx *.h
     misc-patterns = *.cmake *.txt *.xml *.json
-    uncrustify-path=C:\Program files\uncrustify\uncrustify.exe
+    uncrustify-path=C:/Program files/uncrustify/uncrustify.exe
     additional-projects = "D:/Dev/src/fw4spl-ar;D:/Dev/src/fw4spl-ext"
 
 Available options are :
@@ -79,7 +79,7 @@ def codingstyle(files, enable_reformat, check_lgpl, check_commits_date):
         # adds current repository folder to the additional-projects specified in config file.
         fw4spl_projects.append(repoRoot)
         # normalize pathname
-        fw4spl_projects = map(os.path.normpath, fw4spl_projects)
+        fw4spl_projects = list(map(os.path.normpath, fw4spl_projects))
         # remove duplicates
         fw4spl_projects = list(set(fw4spl_projects))
 
@@ -188,15 +188,15 @@ def format_file(source_file, enable_reformat, code_patterns, header_patterns, mi
 
         str_old_file = open(source_file, 'rb').read()
 
-        str_new_file = re.sub('\t', '    ', str_old_file)
+        str_new_file = re.sub('\t', '    ', str_old_file.decode())
         tmp_str = re.sub('\r\n', '\n', str_new_file)
         str_new_file = re.sub('\r', '\n', tmp_str)
 
-        if str_old_file == str_new_file:
+        if str_old_file.decode() == str_new_file:
             return FormatReturn.NotModified
 
         # Something has been changed, write the new file
-        open(source_file, 'wb').write(str_new_file)
+        open(source_file, 'wb').write(str_new_file.encode())
         return FormatReturn.Modified
 
 

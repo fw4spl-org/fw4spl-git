@@ -16,7 +16,7 @@ class TestCodingstyle(unittest.TestCase):
         if len(dircmp.diff_files) > 0 or len(dircmp.funny_files) > 0:
             return False
         else:
-            for sub_dircmp in dircmp.subdirs.values():
+            for sub_dircmp in list(dircmp.subdirs.values()):
                 sub_return = cls.__are_directory_identical(sub_dircmp)
                 if not sub_return:
                     return False
