@@ -173,6 +173,9 @@ if 'codingstyle' in active_hooks:
     results.append(codingstyle_result)
 
     print('\n' + '*' * 120)
+else:
+    # reformatted_files is used elsewhere..
+    reformatted_files = []
 
 common.note("Check phase :")
 results += [f(files) for name, f in hooks.items() if name in active_hooks]
