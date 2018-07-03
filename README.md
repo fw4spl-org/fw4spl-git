@@ -5,7 +5,7 @@ Git tools to manage contributions in fw4spl
 
 ### Requirements
 
-* [Python 2.7.x](https://www.python.org/downloads/)
+* [Python 3.x](https://www.python.org/downloads/)
 * [Git](https://git-scm.com/)
 * To use *codingstyle-hook*, you must install our patched version of **[Uncrustify](https://github.com/fw4spl-org/uncrustify/releases)**
 * To use *cppcheck-hook*, you must install [CppCheck](http://cppcheck.sourceforge.net/)
