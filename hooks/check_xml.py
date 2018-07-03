@@ -167,16 +167,13 @@ def check_xml(files):
             content = f.contents
             common.trace('Checking ' + str(f.path) + ' syntax...')
             try:
-                tree = xml_parser(content)
+                tree = xml_parser(content.decode())
+                msg = check_configurations(tree)
+                if msg:
+                    common.error('XML parsing error in ' + f.path + ' :\n' + msg)
+                    abort = True
             except ET.ParseError as err:
-
                 common.error('XML parsing error in ' + f.path + ' :\n' + err.msg + '\n')
-                abort = True
-
-            msg = check_configurations(tree)
-
-            if msg:
-                common.error('XML parsing error in ' + f.path + ' :\n' + msg)
                 abort = True
 
     return abort

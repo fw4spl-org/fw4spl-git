@@ -229,7 +229,7 @@ def fix_license_year(path, enable_reformat, status, check_commits_date):
             with open(path, 'wb') as source_file:
 
                 source_file.write(lic + "\n\n")
-                source_file.write(content)
+                source_file.write(content.encode())
 
             common.note('LGPL license header fixed in : ' + FILEWARN(path) + '.')
             return FormatReturn.Modified
@@ -277,7 +277,7 @@ def fix_license_year(path, enable_reformat, status, check_commits_date):
 
             common.note('Licence year fixed in : ' + FILEWARN(path))
             with open(path, 'wb') as source_file:
-                source_file.write(str_new_file)
+                source_file.write(str_new_file.encode())
             return FormatReturn.Modified
 
         else:
@@ -336,7 +336,7 @@ def fix_header_guard(path, enable_reformat):
             content = content.replace(match2.group(0), "")
             common.note("Old style of header guard fixed : " + match2.group(0) + "in file : " + FILEWARN(path) + ".")
             with open(path, 'wb') as source_file:
-                source_file.write(content)
+                source_file.write(content.encode())
             ret.add(FormatReturn.Modified)
 
         else:
@@ -362,9 +362,9 @@ def fix_header_guard(path, enable_reformat):
                               re.MULTILINE)
 
             with open(path, 'wb') as source_file:
-                source_file.write(match.group(0))
-                source_file.write("#pragma once\n\n")
-                source_file.write(content.replace(match.group(0), ""))
+                source_file.write(match.group(0).encode())
+                source_file.write(b"#pragma once\n\n")
+                source_file.write(content.replace(match.group(0), "").encode())
 
             common.note("'#pragma once' fixed in :" + FILEWARN(path))
 
@@ -417,9 +417,9 @@ def fix_header_guard(path, enable_reformat):
 
             with open(path, 'wb') as source_file:
 
-                source_file.write(out2)
-                source_file.write("#pragma once\n")
-                source_file.write(content.replace(out, ""))
+                source_file.write(out2.encode())
+                source_file.write(b"#pragma once\n")
+                source_file.write(content.replace(out, "").encode())
 
             ret.add(FormatReturn.Modified)
             return ret.value

@@ -125,3 +125,18 @@ Thus to change globally the path to uncrustify, you may call something like:
 ```bash
 git config --global codingstyle-hook.uncrustify-path /home/toto/software/uncrustify/bin/uncrustify
 ```
+
+### Unit-tests
+
+- To execute unit-tests you must be in `hooks` folder.
+- You can run a specific unit-tests (`test_check_xml` by example) with the command:
+
+```
+> python -m unittest tests.test_check_xml
+```
+
+- To run all unit-tests, you can use `discover` option:
+
+```
+> python -m unittest discover
+```

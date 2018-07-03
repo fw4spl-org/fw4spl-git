@@ -74,7 +74,7 @@ class TestCodingstyle(unittest.TestCase):
         result, reformatted = self.__execute_codingstyle('data/Codingstyle/Formatted', False)
 
         # Check result
-        self.assertFalse(result, "Codingstyle function should return no error.")
+        self.assertTrue(result, "Codingstyle function should return no error.")
         self.assertFalse(len(reformatted) > 0, "No file should have been reformatted.")
 
     def test_codingstyle_lgpl_check(self):
@@ -130,7 +130,7 @@ class TestCodingstyle(unittest.TestCase):
         result, reformatted = self.__execute_codingstyle('data/Codingstyle/Uncrustify_formatted', False)
 
         # Check result
-        self.assertFalse(result, "Codingstyle function should return True as no file contains error.")
+        self.assertTrue(result, "Codingstyle function should return True as no file contains error.")
         self.assertFalse(len(reformatted) > 0, "No file should have been fixed.")
 
     def test_codingstyle_uncrusitfy_unformatted_check(self):
@@ -146,7 +146,7 @@ class TestCodingstyle(unittest.TestCase):
                                                          verbatim='data/Codingstyle/Uncrustify_formatted')
 
         # Check result
-        self.assertFalse(result, "Codingstyle function should return no error.")
+        self.assertTrue(result, "Codingstyle function should return no error.")
         self.assertTrue(len(reformatted) > 0, "Some files should have been fixed.")
 
 

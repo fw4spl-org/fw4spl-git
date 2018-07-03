@@ -59,7 +59,7 @@ def warn(msg):
 
 def binary(s):
     """return true if a string is binary data"""
-    return '\0' in s
+    return b'\0' in s
 
 
 ExecutionResult = collections.namedtuple(
@@ -316,7 +316,7 @@ def file_on_disk(path):
     status = status_of_file(path)
 
     if status is not None and status != 'D':
-        with open(path, 'r') as content_file:
+        with open(path, 'rb') as content_file:
             content = content_file.read()
 
         stat = os.stat(path)
