@@ -1,0 +1,13 @@
+image: python:3.6
+
+before_script:
+  - apt-get update && apt-get install -y cppcheck wget tar
+  - python -V
+  - wget -q --no-check-certificate https://github.com/fw4spl-org/uncrustify/releases/download/sheldon-1.0/uncrustify-sheldon-1.0-Linux.tar.gz
+  - tar xzf uncrustify-sheldon-1.0-Linux.tar.gz > /dev/null
+  - git config --global codingstyle-hook.uncrustify-path `pwd`/uncrustify-Uncrustify-sheldon-1.0-Linux/bin/uncrustify
+  
+test:
+  script:
+    - cd ./hooks
+    - python -m unittest discover
