@@ -22,22 +22,21 @@ def find_current_library(path):
     # /home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/core/fwDataCamp/include/fwMedDataCamp/DicomSeries.hpp
     # split into
     # ['/home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/core/fwDataCamp/', 'include/fwMedDataCamp/DicomSeries.hpp']
-    split_by_inc = string.split(path, 'include/')
+    split_by_inc = path.split('include/')
 
     # If something has been split, that means we have an include
     if len(split_by_inc) > 1:
         lib_path = split_by_inc
     else:
-        lib_path = string.split(path, 'src/')
+        lib_path = path.split('src/')
 
     # Now we take the second last element (we start from the end because 'include' or 'src' may appear multiple times)
     lib = lib_path[-2]
-
-    lib_name = string.split(lib, '/')[-2]
+    lib_name = lib.split('/')[-2]
     if lib_name == "tu":
         # If we have a unit test, for instance '/home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/io/fwCsvIO/test/tu/CsvReaderTest.hpp'
         # We will get 'tu' instead of the library name and thus we have to skip '/test/tu'
-        lib_name = string.split(lib, '/')[-4]
+        lib_name = lib.split('/')[-4]
 
     # We have kept '/home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/core/fwDataCamp/'
     # We take the second last element split by '/', so in this case 'fwDataCamp'
