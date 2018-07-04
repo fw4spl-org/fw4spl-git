@@ -159,7 +159,7 @@ def _contents(sha):
     result = execute_command('git show ' + sha)
 
     if result.status == 0:
-        return result.out.decode()
+        return result.out
 
     warn(result.out.decode())
     return ""
@@ -169,7 +169,7 @@ def _diff_index(rev):
     result = execute_command('git diff-index --cached -z --diff-filter=AM ' + rev)
 
     if result.status == 0:
-        return result.out.decode()
+        return result.out
 
     warn(result.out.decode())
     return ""
@@ -179,7 +179,7 @@ def _diff(rev, rev2):
     result = execute_command('git diff --raw -z --diff-filter=AM ' + rev + ' ' + rev2)
 
     if result.status == 0:
-        return result.out.decode()
+        return result.out
 
     warn(result.out.decode())
     return ""
@@ -201,7 +201,7 @@ def files_in_rev(rev, rev2=''):
     # see: git help diff-index
     # "RAW OUTPUT FORMAT" section
     diff_row_regex = re.compile(
-        r'''
+        b'''
         :
         (?P<old_mode>[^ ]+)
         [ ]
@@ -228,17 +228,17 @@ def files_in_rev(rev, rev2=''):
             continue
 
         # Try to guest if the file has been deleted in a later commit
-        file_status = status_of_file(get_repo_root() + '/' + path)
+        file_status = status_of_file(get_repo_root() + '/' + path.decode())
 
         if file_status is None or file_status == 'D':
             continue
 
-        content = _contents(sha)
+        content = _contents(sha.decode())
 
         if content is None or len(content) <= 0:
             continue
 
-        size = _size(sha)
+        size = _size(sha.decode())
 
         if size is None or size <= 0:
             continue
@@ -246,10 +246,10 @@ def files_in_rev(rev, rev2=''):
         yield FileAtIndex(
             content,
             size,
-            mode,
-            sha,
-            status,
-            path
+            mode.decode(),
+            sha.decode(),
+            status.decode(),
+            path.decode()
         )
 
 
@@ -257,7 +257,7 @@ def files_staged_for_commit(rev):
     # see: git help diff-index
     # "RAW OUTPUT FORMAT" section
     diff_index_row_regex = re.compile(
-        r'''
+        b'''
         :
         (?P<old_mode>[^ ]+)
         [ ]
@@ -281,16 +281,16 @@ def files_staged_for_commit(rev):
         )
 
         # Try to guest if the file has been deleted in a later commit
-        file_status = status_of_file(get_repo_root() + '/' + path)
+        file_status = status_of_file(get_repo_root() + '/' + path.decode())
 
         if status is not None and status != 'D' and file_status is not None and file_status != 'D':
             yield FileAtIndex(
-                _contents(sha),
-                _size(sha),
-                mode,
-                sha,
-                status,
-                path
+                _contents(sha.decode()),
+                _size(sha.decode()),
+                mode.decode(),
+                sha.decode(),
+                status.decode(),
+                path.decode()
             )
 
 
