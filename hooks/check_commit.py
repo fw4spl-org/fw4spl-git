@@ -21,7 +21,7 @@ def unpushed_commit_message():
     if command_result.status != 0:
         return []
     else:
-        return command_result.out.split('\n')
+        return command_result.out.decode().split('\n')
 
 
 def commit_in_path(old_path=None, new_path=None):
@@ -38,7 +38,7 @@ def commit_in_path(old_path=None, new_path=None):
     if command_result.status != 0:
         return []
     else:
-        return command_result.out.split('\n')
+        return command_result.out.decode().split('\n')
 
 
 # check the title conformance against commitizen/angularjs/... rules
