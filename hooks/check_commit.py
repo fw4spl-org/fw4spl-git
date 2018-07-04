@@ -20,6 +20,7 @@ class _Const(object):
 
 CONST = _Const()
 
+TITLE_PATTERN_REGEX = r'(?P<type>' + '|'.join(CONST.TYPES) + ')\((?P<scope>\S+)\):(?P<subject> [a-z].*)'
 
 # return all unpushed commit message
 def unpushed_commit_message():
@@ -51,7 +52,7 @@ def commit_in_path(old_path=None, new_path=None):
 # check the title conformance against commitizen/angularjs/... rules
 def __check_commit_title(commit_hash, commit_title):
     # Test the title against regex
-    title_pattern = re.compile(r'(?P<type>' + '|'.join(CONST.TYPES) + ')\((?P<scope>\S+)\):(?P<subject> [a-z].*)')
+    title_pattern = re.compile(TITLE_PATTERN_REGEX)
     title_match = title_pattern.match(commit_title)
 
     # Convert into a boolean
