@@ -12,7 +12,7 @@ class Types(object):
 
 TYPES = Types()
 
-TITLE_PATTERN_REGEX = r'(?P<type>' + '|'.join(TYPES) + ')\((?P<scope>\S+)\):(?P<subject> [A-Za-z].*)'
+TITLE_PATTERN_REGEX = r'(?P<type>' + '|'.join(TYPES) + ')\((?P<scope>\S+)\):(?P<subject> [a-z].*)'
 
 # return all unpushed commit message
 def unpushed_commit_message():
