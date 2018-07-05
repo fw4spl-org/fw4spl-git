@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-import os, sys
+import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../hooks'))
 
@@ -14,6 +15,7 @@ import argparse
 # The only difference for now is the subject starting with a capital (which is forbidden normally)
 TITLE_PATTERN_REGEX = r'(?P<type>' + '|'.join(check_commit.TYPES) + ')\((?P<scope>\S+)\):(?P<subject> [A-z].*)'
 
+
 def gitlog(rev, rev2, options=''):
     command = 'git log --first-parent ' + options + ' ' + rev + '..' + rev2
     result = common.execute_command(command)
@@ -21,7 +23,7 @@ def gitlog(rev, rev2, options=''):
     if result.status == 0:
         return result.out.decode()
 
-    raise Exception('Error executing "%s"', command )
+    raise Exception('Error executing "%s"', command)
 
 
 def gen_log(rev, rev2):
@@ -54,9 +56,9 @@ def gen_log(rev, rev2):
 
             if found_commit:
 
-                # Strip some text...
+                #  Strip some text...
                 description_line = re.sub(regex_indent, '', line)
-                empty_line =  len(description_line) == 0
+                empty_line = len(description_line) == 0
                 description_line = re.sub(regex_see_mr, '', description_line)
                 description_line = re.sub(regex_close_bug, '', description_line)
                 description_line = re.sub(regex_merge_branch, '', description_line)

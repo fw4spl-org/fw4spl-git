@@ -318,9 +318,9 @@ def fix_header_guard(path, enable_reformat):
         elif find:
             res += substrings[i].upper() + "_";
     expected_guard = res.split('.');
-    if len(re.findall("HXX", expected_guard[1], re.DOTALL)) != 0 :
+    if len(re.findall("HXX", expected_guard[1], re.DOTALL)) != 0:
         expected_guard[0] += "_HXX__";
-    else :
+    else:
         expected_guard[0] += "_HPP__";
 
     expected_guard = expected_guard[0]

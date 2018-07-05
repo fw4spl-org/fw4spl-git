@@ -10,9 +10,11 @@ class Types(object):
     def __iter__(self):
         return (x for x in ['feat', 'fix', 'perf', 'revert', 'docs', 'chore', 'style', 'refactor', 'test', 'merge'])
 
+
 TYPES = Types()
 
-TITLE_PATTERN_REGEX = r'(?P<type>' + '|'.join(TYPES) + ')\((?P<scope>\S+)\):(?P<subject> [a-z].*)'
+TITLE_PATTERN_REGEX = r'(?P<type>' + '|'.join(TYPES) + ')\((?P<scope>\S+)\): (?P<subject>[a-z].*)'
+
 
 # return all unpushed commit message
 def unpushed_commit_message():

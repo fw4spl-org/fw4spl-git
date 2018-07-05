@@ -47,7 +47,7 @@ SLM_LOG = lambda x: bool(
 )
 DIGRAPH = lambda x: "<:" in x or ":>" in x
 DOXYGEN = lambda x: '* @class' in x or '* @date' in x or '* @namespace' in x
-BADWORDS = lambda x: any( re.search(r'\b'+bad+r'\b', x, re.IGNORECASE) for bad in BAD_WORDS_LIST )
+BADWORDS = lambda x: any(re.search(r'\b' + bad + r'\b', x, re.IGNORECASE) for bad in BAD_WORDS_LIST)
 
 tr = {
     'crlf': (CRLF, 'CRLF line endings', '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py'),

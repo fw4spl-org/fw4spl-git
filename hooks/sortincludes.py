@@ -3,7 +3,6 @@
 
 import os
 import re
-import string
 
 import common
 from common import FormatReturn
