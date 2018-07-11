@@ -125,3 +125,26 @@ Thus to change globally the path to uncrustify, you may call something like:
 ```bash
 git config --global codingstyle-hook.uncrustify-path /home/toto/software/uncrustify/bin/uncrustify
 ```
+
+### Configuration via git hooks
+
+You can also use sheldon in specific hooks of your git repositories, via the `.git/hooks` directory located at the root of your repository.
+
+Here are some examples of hooks you can configure:
+
+- pre-commit: this hook will prevent a commit if the code you want to commit does not respect the guidelines.
+
+```bash
+#!/bin/sh
+
+sheldon
+```
+
+- commit-msg: this hook will prevent a commit if the commit message does not respect the guidelines.
+
+```bash
+#!/bin/sh
+
+sheldon --commit-message-file $1
+exit $?
+```
