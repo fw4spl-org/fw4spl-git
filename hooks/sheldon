@@ -88,8 +88,9 @@ if args.commit_message_file:
     if(os.path.exists(args.commit_message_file)):
         with open(args.commit_message_file, 'r') as commit_message_file:
             commit_message = commit_message_file.read()
-        result = check_commit.check_commit_messages([commit_message])
-        exit(any(result))
+        print(commit_message)
+        result = check_commit.__check_commit_title("None", commit_message)
+        exit(result)
 
 if args.input_path is not None and len(args.input_path) > 0:
     # Double check path argument

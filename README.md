@@ -148,3 +148,5 @@ sheldon
 sheldon --commit-message-file $1
 exit $?
 ```
+
+For the hooks to be enabled, the files must be made executable.
