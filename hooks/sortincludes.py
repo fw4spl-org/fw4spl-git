@@ -166,7 +166,7 @@ def sort_includes(path, enable_reformat):
 
         if cpp and re.search(b'".*' + matched_header.encode() + b'.*"', include):
             own_header_include += [(module, include)]
-        elif module == cur_lib or re.search(b'".*"', include):
+        elif module == cur_lib.encode() or re.search(b'".*"', include):
             current_module_includes += [(module, include)]
         elif module in g_libs:
             lib_includes += [(module, include)]
