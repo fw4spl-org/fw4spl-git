@@ -169,7 +169,7 @@ def format_file(source_file, enable_reformat, code_patterns, header_patterns, mi
                 uncrustify = common.execute_command(command % '--replace --no-backup --if-changed')
                 if uncrustify.status != 0:
                     common.error('Uncrustify failure on file: ' + source_file)
-                    common.error(uncrustify.out)
+                    common.error(uncrustify.out.decode())
                     return FormatReturn.Error
                 ret.add(FormatReturn.Modified)
         else:
