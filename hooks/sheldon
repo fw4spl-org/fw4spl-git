@@ -59,6 +59,11 @@ parser.add_argument('-c', '--commit',
                     dest='commit_check',
                     help='Check all unpunished commit')
 
+parser.add_argument('--commit-message-file',
+                    action='store',
+                    dest='commit_message_file',
+                    help='Check a file containing a commit message (can be with the commit-msg hook)')
+
 parser.add_argument('path',
                     nargs='*',
                     help='Git path, can be a commit or two commits.')
@@ -74,6 +79,18 @@ common.g_uncrustify_path_arg = args.uncrustify_path
 
 # Whether we will check file dates from commits date or from the local time
 check_commits_date = True
+
+# Check a commit message via a file containing it
+# Should be used with the commit-msg git hook
+if args.commit_message_file:
+    common.note("Checking commit message in: " + args.commit_message_file)
+
+    if(os.path.exists(args.commit_message_file)):
+        with open(args.commit_message_file, 'r') as commit_message_file:
+            commit_message = commit_message_file.read()
+        print(commit_message)
+        result = check_commit.__check_commit_title("None", commit_message)
+        exit(result)
 
 if args.input_path is not None and len(args.input_path) > 0:
     # Double check path argument
