@@ -106,7 +106,7 @@ def check_autoConnect(config_tree):
         uid = srv.get("uid")
         connect = srv.get("autoConnect")
 
-        if connect:
+        if connect == "yes":
 
             inouts = srv.findall("inout") + srv.findall("in")
             if not inouts:
@@ -161,6 +161,11 @@ def check_unused_service(config_tree):
         srv_found = False
 
         srv_uid = srv.get("uid")
+
+        if srv_uid is None:
+            type = srv.get("type")
+            err += "- 'uid' is not defined for the service '" + type + "'"
+            break
 
         for uid in uids:
             if srv_uid == uid:
