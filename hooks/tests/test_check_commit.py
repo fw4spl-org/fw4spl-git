@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import unittest
@@ -14,7 +14,7 @@ class TestCheckCommit(unittest.TestCase):
 
         # Apply the hook
         result = check_commit.check_commit_messages(
-            ["ffffffff:devil@ircad.fr:fix(reactor): Prevent uncontrolled nuclear fusion. See #666"])
+            ["ffffffff:devil@ircad.fr:fix(reactor): prevent uncontrolled nuclear fusion. See #666"])
 
         result += check_commit.check_commit_messages(
             ["ffffffff:devil@ircad.fr:chore(*): apply latest sheldon"])
@@ -42,7 +42,7 @@ class TestCheckCommit(unittest.TestCase):
 
         # Apply the hook
         result = check_commit.check_commit_messages(
-            ["ffffffff:god@ircad.fr:fix(reactor): Prevent uncontrolled nuclear fusion. See #666"])
+            ["ffffffff:god@ircad.fr:fix(reactor): prevent uncontrolled nuclear fusion. See #666"])
 
         # Check result
         self.assertFalse(any(result), "A valid commit has been detected as invalid.")

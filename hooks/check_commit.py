@@ -6,21 +6,15 @@ import re
 import common
 
 
-class _Const(object):
-    @apply
-    def TYPES():
-        def fset(self, value):
-            raise TypeError
-
-        def fget(self):
-            return ['feat', 'fix', 'perf', 'revert', 'docs', 'chore', 'style', 'refactor', 'test', 'merge']
-
-        return property(**locals())
+class Types(object):
+    def __iter__(self):
+        return (x for x in ['feat', 'fix', 'perf', 'revert', 'docs', 'chore', 'style', 'refactor', 'test', 'merge'])
 
 
-CONST = _Const()
+TYPES = Types()
 
-TITLE_PATTERN_REGEX = r'(?P<type>' + '|'.join(CONST.TYPES) + ')\((?P<scope>\S+)\):(?P<subject> [a-z].*)'
+TITLE_PATTERN_REGEX = r'(?P<type>' + '|'.join(TYPES) + ')\((?P<scope>\S+)\): (?P<subject>[a-z].*)'
+
 
 # return all unpushed commit message
 def unpushed_commit_message():
@@ -29,7 +23,7 @@ def unpushed_commit_message():
     if command_result.status != 0:
         return []
     else:
-        return command_result.out.split('\n')
+        return command_result.out.decode().split('\n')
 
 
 def commit_in_path(old_path=None, new_path=None):
@@ -46,7 +40,7 @@ def commit_in_path(old_path=None, new_path=None):
     if command_result.status != 0:
         return []
     else:
-        return command_result.out.split('\n')
+        return command_result.out.decode().split('\n')
 
 
 # check the title conformance against commitizen/angularjs/... rules
@@ -64,7 +58,7 @@ def __check_commit_title(commit_hash, commit_title):
             + commit_hash
             + "' with title '"
             + commit_title
-            + "' does not follow Sheldon rules: '<" + "|".join(CONST.TYPES) + ">(<scope>): <subject>'.")
+            + "' does not follow Sheldon rules: '<" + "|".join(TYPES) + ">(<scope>): <subject>'.")
 
     return title_have_not_matched
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 import collections
@@ -41,25 +41,25 @@ class FileAtIndex(object):
 
 
 def note(msg):
-    print('* [Sheldon] ' + msg)
+    print(('* [Sheldon] ' + msg))
 
 
 def trace(msg):
     if g_trace:
-        print('* [Sheldon] ' + msg)
+        print(('* [Sheldon] ' + msg))
 
 
 def error(msg):
-    print('*** [ERROR] ' + msg + ' ***')
+    print(('*** [ERROR] ' + msg + ' ***'))
 
 
 def warn(msg):
-    print('* [Warning] ' + msg + ' *')
+    print(('* [Warning] ' + msg + ' *'))
 
 
 def binary(s):
     """return true if a string is binary data"""
-    return bool(s and '\0' in s)
+    return b'\0' in s
 
 
 ExecutionResult = collections.namedtuple(
@@ -69,12 +69,12 @@ ExecutionResult = collections.namedtuple(
 
 
 def get_repo_root():
-    result = execute_command('git rev-parse --show-toplevel');
+    result = execute_command('git rev-parse --show-toplevel')
 
     if result.status == 0:
-        return result.out.strip()
+        return result.out.strip().decode()
 
-    warn(result.out)
+    warn(result.out.decode())
     return ""
 
 
@@ -93,12 +93,12 @@ def _get_git_commit_datetime(path):
     result = execute_command('git log -1 --format=%ad --date=format:%Y-%m-%dT%H:%M:%S ' + path)
 
     if result.status != 0:
-        warn(result.out)
+        warn(result.out.decode())
         return None
 
     try:
         # Parse the string back to a datetime object
-        return datetime.datetime.strptime(result.out.strip(), '%Y-%m-%dT%H:%M:%S')
+        return datetime.datetime.strptime(result.out.decode().strip(), '%Y-%m-%dT%H:%M:%S')
     except Exception as e:
         warn(e.message)
         return None
@@ -150,7 +150,7 @@ def current_commit():
 def get_option(option, default, type=""):
     try:
         out = subprocess.check_output(('git config ' + type + ' ' + option).split()).strip()
-        return out
+        return out.decode()
     except subprocess.CalledProcessError:
         return default
 
@@ -161,7 +161,7 @@ def _contents(sha):
     if result.status == 0:
         return result.out
 
-    warn(result.out)
+    warn(result.out.decode())
     return ""
 
 
@@ -171,7 +171,7 @@ def _diff_index(rev):
     if result.status == 0:
         return result.out
 
-    warn(result.out)
+    warn(result.out.decode())
     return ""
 
 
@@ -181,7 +181,7 @@ def _diff(rev, rev2):
     if result.status == 0:
         return result.out
 
-    warn(result.out)
+    warn(result.out.decode())
     return ""
 
 
@@ -193,7 +193,7 @@ def _size(sha):
         except ValueError:
             return 0
 
-    warn(result.out)
+    warn(result.out.decode())
     return 0
 
 
@@ -201,7 +201,7 @@ def files_in_rev(rev, rev2=''):
     # see: git help diff-index
     # "RAW OUTPUT FORMAT" section
     diff_row_regex = re.compile(
-        r'''
+        b'''
         :
         (?P<old_mode>[^ ]+)
         [ ]
@@ -228,17 +228,17 @@ def files_in_rev(rev, rev2=''):
             continue
 
         # Try to guest if the file has been deleted in a later commit
-        file_status = status_of_file(get_repo_root() + '/' + path)
+        file_status = status_of_file(get_repo_root() + '/' + path.decode())
 
         if file_status is None or file_status == 'D':
             continue
 
-        content = _contents(sha)
+        content = _contents(sha.decode())
 
         if content is None or len(content) <= 0:
             continue
 
-        size = _size(sha)
+        size = _size(sha.decode())
 
         if size is None or size <= 0:
             continue
@@ -246,10 +246,10 @@ def files_in_rev(rev, rev2=''):
         yield FileAtIndex(
             content,
             size,
-            mode,
-            sha,
-            status,
-            path
+            mode.decode(),
+            sha.decode(),
+            status.decode(),
+            path.decode()
         )
 
 
@@ -257,7 +257,7 @@ def files_staged_for_commit(rev):
     # see: git help diff-index
     # "RAW OUTPUT FORMAT" section
     diff_index_row_regex = re.compile(
-        r'''
+        b'''
         :
         (?P<old_mode>[^ ]+)
         [ ]
@@ -274,22 +274,23 @@ def files_staged_for_commit(rev):
         ''',
         re.X
     )
-    for match in diff_index_row_regex.finditer(_diff_index(rev)):
+    diff_idx = _diff_index(rev)
+    for match in diff_index_row_regex.finditer(diff_idx):
         mode, sha, status, path = match.group(
             'new_mode', 'new_sha1', 'status', 'path'
         )
 
         # Try to guest if the file has been deleted in a later commit
-        file_status = status_of_file(get_repo_root() + '/' + path)
+        file_status = status_of_file(get_repo_root() + '/' + path.decode())
 
         if status is not None and status != 'D' and file_status is not None and file_status != 'D':
             yield FileAtIndex(
-                _contents(sha),
-                _size(sha),
-                mode,
-                sha,
-                status,
-                path
+                _contents(sha.decode()),
+                _size(sha.decode()),
+                mode.decode(),
+                sha.decode(),
+                status.decode(),
+                path.decode()
             )
 
 
@@ -315,7 +316,7 @@ def file_on_disk(path):
     status = status_of_file(path)
 
     if status is not None and status != 'D':
-        with open(path, 'r') as content_file:
+        with open(path, 'rb') as content_file:
             content = content_file.read()
 
         stat = os.stat(path)
@@ -335,4 +336,4 @@ def directory_on_disk(path):
     for root, dirs, files in os.walk(path):
         for name in files:
             file_path = os.path.join(root, name)
-            yield file_on_disk(file_path).next()
+            yield next(file_on_disk(file_path))

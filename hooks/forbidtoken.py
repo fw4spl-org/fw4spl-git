@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -47,7 +47,7 @@ SLM_LOG = lambda x: bool(
 )
 DIGRAPH = lambda x: "<:" in x or ":>" in x
 DOXYGEN = lambda x: '* @class' in x or '* @date' in x or '* @namespace' in x
-BADWORDS = lambda x: any( re.search(r'\b'+bad+r'\b', x, re.IGNORECASE) for bad in BAD_WORDS_LIST )
+BADWORDS = lambda x: any(re.search(r'\b' + bad + r'\b', x, re.IGNORECASE) for bad in BAD_WORDS_LIST)
 
 tr = {
     'crlf': (CRLF, 'CRLF line endings', '*.cpp *.hpp *.hxx *.cxx *.c *.h *.xml *.txt *.cmake *.py'),
@@ -80,10 +80,11 @@ def forbidtoken(files, config_name):
             continue
         common.trace('Checking ' + str(f.path) + '...')
         content = f.contents
-        if not common.binary(content) and token(content):
+
+        if not common.binary(content) and token(content.decode()):
             if not abort:
                 common.error(WARNING % (tr[config_name][1]))
-            for n in line_match(token, content):
+            for n in line_match(token, content.decode()):
                 common.error(FILEWARN % (f.path, n))
             abort = True
         count += 1

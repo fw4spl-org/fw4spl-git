@@ -1,7 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-import os, sys
+import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../hooks'))
 
@@ -12,16 +13,17 @@ import argparse
 
 # FIXME: For now, we duplicate the regex of check_commit.py because some commits are not always properly formatted
 # The only difference for now is the subject starting with a capital (which is forbidden normally)
-TITLE_PATTERN_REGEX = r'(?P<type>' + '|'.join(check_commit.CONST.TYPES) + ')\((?P<scope>\S+)\):(?P<subject> [A-z].*)'
+TITLE_PATTERN_REGEX = r'(?P<type>' + '|'.join(check_commit.TYPES) + ')\((?P<scope>\S+)\):(?P<subject> [A-z].*)'
+
 
 def gitlog(rev, rev2, options=''):
     command = 'git log --first-parent ' + options + ' ' + rev + '..' + rev2
     result = common.execute_command(command)
 
     if result.status == 0:
-        return result.out
+        return result.out.decode()
 
-    raise Exception('Error executing "%s"', command )
+    raise Exception('Error executing "%s"', command)
 
 
 def gen_log(rev, rev2):
@@ -54,9 +56,9 @@ def gen_log(rev, rev2):
 
             if found_commit:
 
-                # Strip some text...
+                #  Strip some text...
                 description_line = re.sub(regex_indent, '', line)
-                empty_line =  len(description_line) == 0
+                empty_line = len(description_line) == 0
                 description_line = re.sub(regex_see_mr, '', description_line)
                 description_line = re.sub(regex_close_bug, '', description_line)
                 description_line = re.sub(regex_merge_branch, '', description_line)
@@ -104,7 +106,7 @@ def gen_log(rev, rev2):
 
         if found_commit:
 
-            if not changelog.has_key(commit_type):
+            if commit_type not in changelog:
                 changelog[commit_type] = []
 
             changelog[commit_type].append([commit_scope, commit_subject, commit_description])
@@ -117,7 +119,7 @@ def gen_log(rev, rev2):
 
     formatted_changelog = '# ' + repo_name + ' ' + rev2 + '\n\n'
 
-    for commit_type, entries in changelog.iteritems():
+    for commit_type, entries in changelog.items():
 
         if commit_type in ['feat']:
             formatted_changelog += '## New features:\n\n'
@@ -138,7 +140,7 @@ def gen_log(rev, rev2):
                 formatted_changelog += entry[1]
             formatted_changelog += entry[2]
 
-    print formatted_changelog
+    print(formatted_changelog)
 
 
 parser = argparse.ArgumentParser(
