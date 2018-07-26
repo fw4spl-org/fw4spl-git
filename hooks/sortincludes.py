@@ -1,9 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import os
 import re
-import string
 
 import common
 from common import FormatReturn
@@ -22,22 +21,21 @@ def find_current_library(path):
     # /home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/core/fwDataCamp/include/fwMedDataCamp/DicomSeries.hpp
     # split into
     # ['/home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/core/fwDataCamp/', 'include/fwMedDataCamp/DicomSeries.hpp']
-    split_by_inc = string.split(path, 'include/')
+    split_by_inc = path.split('include/')
 
     # If something has been split, that means we have an include
     if len(split_by_inc) > 1:
         lib_path = split_by_inc
     else:
-        lib_path = string.split(path, 'src/')
+        lib_path = path.split('src/')
 
     # Now we take the second last element (we start from the end because 'include' or 'src' may appear multiple times)
     lib = lib_path[-2]
-
-    lib_name = string.split(lib, '/')[-2]
+    lib_name = lib.split('/')[-2]
     if lib_name == "tu":
         # If we have a unit test, for instance '/home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/io/fwCsvIO/test/tu/CsvReaderTest.hpp'
         # We will get 'tu' instead of the library name and thus we have to skip '/test/tu'
-        lib_name = string.split(lib, '/')[-4]
+        lib_name = lib.split('/')[-4]
 
     # We have kept '/home/fbridault/dev/f4s-sandbox/src/f4s/SrcLib/core/fwDataCamp/'
     # We take the second last element split by '/', so in this case 'fwDataCamp'
@@ -62,14 +60,12 @@ def find_libraries_and_bundles(fw4spl_projects):
                 for file in files:
                     if file == "CMakeLists.txt":
                         if re.match('.*Bundles', root):
-                            g_bundles += [rootdir]
+                            g_bundles += [rootdir.encode()]
                         elif re.match('.*SrcLib', root):
-                            g_libs += [rootdir]
+                            g_libs += [rootdir.encode()]
 
     g_libs.sort()
     g_bundles.sort()
-
-
 
 
 def clean_list(includes):
@@ -83,11 +79,11 @@ def clean_list(includes):
     prev_module = includes[0][0]
     for module, include in includes:
         if prev_module != module:
-            new_include_list += ['\n']
+            new_include_list += [b'\n']
         new_include_list += [include]
         prev_module = module
 
-    new_include_list += ['\n']
+    new_include_list += [b'\n']
     return new_include_list
 
 
@@ -100,8 +96,7 @@ def sort_includes(path, enable_reformat):
 
     pathname = os.path.dirname(__file__) + "/"
 
-    file = open(pathname + "std_headers.txt", 'r')
-
+    file = open(pathname + "std_headers.txt", 'rb')
     lib_std = file.read()
     file.close()
 
@@ -116,38 +111,38 @@ def sort_includes(path, enable_reformat):
     out_of_include = False
 
     for i, line in enumerate(content):
-        if re.match("#include", line):
+        if re.match(b"#include", line):
             if out_of_include:
                 common.warn(
                     'Failed to parse includes in file ' + path + ', includes sort is skipped. Maybe there is a #ifdef ? This may be handled in a future version.\n')
-                return
+                return FormatReturn.NotModified
 
             if first_line == -1:
                 first_line = i
             last_line = i
 
             includes.add(line)
-        elif first_line > -1 and line != "\n":
+        elif first_line > -1 and line != b"\n":
             out_of_include = True
 
     if first_line == -1 and last_line == -1:
         # No include, skip
-        return
+        return FormatReturn.NotModified
 
     include_modules = []
 
     # Create associated list of modules
     for include in includes:
-        include_path_match = re.match('.*<(.*/.*)>', include)
+        include_path_match = re.match(b'.*<(.*/.*)>', include)
         module = ""
         if include_path_match:
-            module = include_path_match.group(1).split('/')[0]
+            module = include_path_match.group(1).split(b'/')[0]
         else:
-            include_path_match = re.match('.*"(.*/.*)"', include)
+            include_path_match = re.match(b'.*"(.*/.*)"', include)
             if include_path_match:
-                module = include_path_match.group(1).split('/')[0]
+                module = include_path_match.group(1).split(b'/')[0]
             else:
-                module = ""
+                module = b""
 
         include_modules += [module]
 
@@ -169,16 +164,16 @@ def sort_includes(path, enable_reformat):
 
     for include, module in zip(includes, include_modules):
 
-        if cpp and re.search('".*' + matched_header + '.*"', include):
+        if cpp and re.search(b'".*' + matched_header.encode() + b'.*"', include):
             own_header_include += [(module, include)]
-        elif module == cur_lib or re.search('".*"', include):
+        elif module == cur_lib.encode() or re.search(b'".*"', include):
             current_module_includes += [(module, include)]
         elif module in g_libs:
             lib_includes += [(module, include)]
         elif module in g_bundles:
             bundles_includes += [(module, include)]
         else:
-            include_path_match = re.match('.*<(.*)>', include)
+            include_path_match = re.match(b'.*<(.*)>', include)
             if include_path_match and include_path_match.group(1) in lib_std:
                 std_includes += [(module, include)]
             else:

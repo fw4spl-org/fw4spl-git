@@ -5,7 +5,7 @@ Git tools to manage contributions in fw4spl
 
 ### Requirements
 
-* [Python 2.7.x](https://www.python.org/downloads/)
+* [Python 3.x](https://www.python.org/downloads/)
 * [Git](https://git-scm.com/)
 * To use *codingstyle-hook*, you must install our patched version of **[Uncrustify](https://github.com/fw4spl-org/uncrustify/releases)**
 * To use *cppcheck-hook*, you must install [CppCheck](http://cppcheck.sourceforge.net/)
@@ -125,3 +125,43 @@ Thus to change globally the path to uncrustify, you may call something like:
 ```bash
 git config --global codingstyle-hook.uncrustify-path /home/toto/software/uncrustify/bin/uncrustify
 ```
+
+### Unit-tests
+
+- To execute unit-tests you must be in `hooks` folder.
+- You can run a specific unit-tests (`test_check_xml` by example) with the command:
+
+```
+> python -m unittest tests.test_check_xml
+```
+
+- To run all unit-tests, you can use `discover` option:
+
+```
+> python -m unittest discover
+```
+
+### Configuration via git hooks
+
+You can also use sheldon in specific hooks of your git repositories, via the `.git/hooks` directory located at the root of your repository.
+
+Here are some examples of hooks you can configure:
+
+- pre-commit: this hook will prevent a commit if the code you want to commit does not respect the guidelines.
+
+```bash
+#!/bin/sh
+
+sheldon
+```
+
+- commit-msg: this hook will prevent a commit if the commit message does not respect the guidelines.
+
+```bash
+#!/bin/sh
+
+sheldon --commit-message-file $1
+exit $?
+```
+
+For the hooks to be enabled, the files must be made executable.
