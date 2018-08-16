@@ -204,7 +204,7 @@ def format_file(source_file, enable_reformat, code_patterns, header_patterns, mi
 
 # Check licence header
 def fix_license_year(path, enable_reformat, status, check_commits_date):
-    with open(path, 'r') as source_file:
+    with open(path, 'r', encoding='utf-8') as source_file:
         content = source_file.read()
 
     common.trace('Checking for LGPL license in: ' + path)
@@ -294,7 +294,7 @@ def fix_license_year(path, enable_reformat, status, check_commits_date):
 def fix_header_guard(path, enable_reformat):
     ret = FormatReturn()
 
-    with open(path, 'r') as source_file:
+    with open(path, 'r', encoding='utf-8') as source_file:
         content = source_file.read()
 
     # Regex for '#pragma once'
